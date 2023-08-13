@@ -1,7 +1,8 @@
-use lambda_http::{run, service_fn, Body, Error, Request, RequestExt, Response};
+use lambda_http::{run, service_fn, Body, Error, Request, RequestPayloadExt, RequestExt, Response};
 use std::env;
 use lambda_http::http::StatusCode;
 use lambda_http::Body::Text;
+mod discord_types;
 
 /// Takes in a request, validates it, providing an appropriate error code
 /// if validation was unsuccessful.
@@ -17,8 +18,17 @@ fn validate(event: &Request) -> Result<(), StatusCode> {
     }
 }
 
+
+
 fn handle_request(event: &Request) -> Response<Body> {
+    
     let body = Text("hi".to_string());
+    let payload = event.payload;
+    //let payload = event.payload::<discord_types::DiscordRequest>();
+    match payload {
+        Ok(_) => {println!("recognized payload");},
+        Err(_) => {println!("parse error");}
+    }
     Response::builder()
         .status(StatusCode::OK)
         .body(body)
