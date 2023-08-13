@@ -1,0 +1,7 @@
+{
+"httpMethod": "GET",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\r\n\t\"a\": 1\r\n}"
+}
