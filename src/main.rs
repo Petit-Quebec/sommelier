@@ -1,28 +1,36 @@
+use ed25519_dalek::VerifyingKey;
 use lambda_http::{run, service_fn, Body, Error, Request, RequestExt, Response};
-use std::env;
-use serde_json::json;
 use lambda_http::http::StatusCode;
-mod app;
-use crate::app::interactions::{InteractionRequest, InteractionResponse};
+use serde_json::json;
+use std::env;
+
+use crate::app::interactions::{InteractionRequest};
 use crate::app::handle_interaction;
 
-fn validate(event: &Request) -> Result<(), StatusCode> {
+mod app;
 
-    match env::var("NYOOMIO_PUBLIC_KEY") {
-        
-        Ok(pk) => {
-            
-            let query_map = event.query_string_parameters_ref();
-            
-            let signature = query_map.and_then(|params| params.first("X-Signature-Ed25519"));
-            
-            let timestamp = query_map.and_then(|params| params.first("X-Signature-Timestamp"));
-            
-            if true {Ok(())} else {Err(StatusCode::UNAUTHORIZED)}
-        },
+fn lift_option<T>(opt: Option<T>) -> Result<T, StatusCode> {
 
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+    match opt {
+
+        Some(val) => Ok(val),
+
+        None => Err(StatusCode::INTERNAL_SERVER_ERROR)
     }
+}
+
+fn lift_result<T, E>(res: Result<T, E>) -> Result<T, StatusCode> {
+
+    lift_option(res.ok())
+}
+
+fn get_param(event: &Request, key: &str) -> Result<String, StatusCode> {
+
+    let query_map = event.query_string_parameters_ref();
+    
+    let val = query_map.and_then(|params| params.first(key));
+
+    lift_option(val.map(|s| s.to_string()))
 }
 
 fn build_interaction_response(response: String) -> Response<Body> {
@@ -57,32 +65,26 @@ fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
     }
 }
 
-fn handle_request(event: &Request) -> Result<Response<Body>, StatusCode> {
+fn function_handler_helper(event: &Request) -> Result<Response<Body>, StatusCode> {
+    
+    let application_public_key = lift_result(env::var("NYOOMIO_PUBLIC_KEY"))?;
+    
+    let timestamp = get_param(event, "X-Signature-Ed25519")?;
 
-    match std::str::from_utf8(event.body()) {
-        
-        Ok(s) => match handle_interaction_json(s) {
+    let signature = get_param(event, "X-Signature-Timestamp")?;
+   
+    let body = lift_result(std::str::from_utf8(event.body()))?;
 
-            Ok(resp) => Ok(build_interaction_response(resp)),
+    let result_json = handle_interaction_json(body)?;
 
-            Err(code) => Err(code)
-
-        },
-
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
-    }
+    Ok(build_interaction_response(result_json))
 }
 
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
-    
-    match validate(&event) {
-        
-        Ok(())    => match handle_request(&event) {
 
-            Ok(response) => Ok(response),
+    match function_handler_helper(&event) {
 
-            Err(code) => Ok(build_error_response(code))
-        },
+        Ok(result) => Ok(result),
 
         Err(code) => Ok(build_error_response(code))
     }
@@ -134,3 +136,4 @@ mod tests {
         assert_eq!(handle_interaction_json(ping_json).expect(""), expected_pong_json);
     }
 }
+
