@@ -25,11 +25,11 @@ fn validate(event: &Request) -> Result<(), StatusCode> {
     }
 }
 
-fn build_interaction_response(response: &InteractionResponse) -> Response<Body> {
+fn build_interaction_response(response: String) -> Response<Body> {
     
     Response::builder()
         .status(StatusCode::OK)
-        .body(json!(response).to_string().into())
+        .body(response.into())
         .unwrap()
 }
 
@@ -41,15 +41,31 @@ fn build_error_response(code: StatusCode) -> Response<Body> {
         .unwrap()
 }
 
+/// Takes in a json request body, returns a json response body
+fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
+    
+    match serde_json::from_str::<InteractionRequest>(request_json) {
+        
+        Ok(interaction) => {
+            
+            let interaction_response = handle_interaction(&interaction);
+
+            Ok(json!(interaction_response).to_string())
+        },
+
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+    }
+}
+
 fn handle_request(event: &Request) -> Result<Response<Body>, StatusCode> {
 
     match std::str::from_utf8(event.body()) {
         
-        Ok(s) => match serde_json::from_str::<InteractionRequest>(s) {
+        Ok(s) => match handle_interaction_json(s) {
 
-            Ok(interaction) => Ok(build_interaction_response(&handle_interaction(&interaction))),
+            Ok(resp) => Ok(build_interaction_response(resp)),
 
-            Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR)
+            Err(code) => Err(code)
 
         },
 
@@ -86,3 +102,35 @@ async fn main() -> Result<(), Error> {
     run(service_fn(function_handler)).await
 }
 
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_bad_body_json() {
+        
+        let req_json = "not json formatted";
+        
+        assert!(handle_interaction_json(req_json).is_err());
+    }
+
+    #[test]
+    fn test_ping_ack_json() {
+        
+        let ping_json = r#"
+        {
+            "id": "my_id",
+            "application_id": "app_id",
+            "type": 1
+        }
+        "#;
+
+        let expected_pong_json = r#"{"type":1}"#;
+        
+        let pong_json = handle_interaction_json(ping_json);
+
+        assert!(pong_json.is_ok());
+        assert_eq!(handle_interaction_json(ping_json).expect(""), expected_pong_json);
+    }
+}
