@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
 pub struct InteractionRequest {
-    id: String,
-    application_id: String,
-    r#type: u32
+    pub id: String,
+    pub application_id: String,
+    pub r#type: u32
 }
 
 #[derive(Serialize)]
