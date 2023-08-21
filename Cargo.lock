@@ -439,6 +439,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "initialize_app"
+version = "0.1.0"
+
+[[package]]
+name = "interaction_contractor"
+version = "0.1.0"
+
+[[package]]
 name = "itoa"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
