@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+/*
+ * Request Types
+ */
 #[derive(Deserialize_repr)]
 #[repr(u8)]
 pub enum InteractionType {
@@ -11,6 +14,16 @@ pub enum InteractionType {
     ModalSubmit = 5
 }
 
+#[derive(Deserialize)]
+pub struct InteractionRequest {
+    pub id: String,
+    pub application_id: String,
+    pub r#type: InteractionType
+}
+
+/*
+ * Response Types
+ */
 #[derive(Serialize_repr)]
 #[repr(u8)]
 pub enum InteractionCallbackType {
@@ -23,15 +36,14 @@ pub enum InteractionCallbackType {
     Modal = 9
 }
 
-#[derive(Deserialize)]
-pub struct InteractionRequest {
-    pub id: String,
-    pub application_id: String,
-    pub r#type: InteractionType
+#[derive(Serialize)]
+pub struct InteractionCallbackData {
+    pub content: Option<String>
 }
 
 #[derive(Serialize)]
 pub struct InteractionResponse {
-    pub r#type: InteractionCallbackType
+    pub r#type: InteractionCallbackType,
+    pub data: Option<InteractionCallbackData>
 }
 
