@@ -24,7 +24,7 @@ ed25519-dalek = "2.0.0"
 hex = "0.4.3"
 lambda_http = "0.8.1"
 lambda_runtime = "0.8.1"
-serde = "1.0.183"
+serde = "1.0.171"
 serde_json = "1.0.104"
 serde_repr = "0.1.16"
 tokio = { version = "1", features = ["macros"] }
