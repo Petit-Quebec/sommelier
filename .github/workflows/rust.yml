@@ -16,12 +16,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
       env:
         PROSPECTOR_APPLICATION_ID: ${{ secrets.PROSPECTOR_APPLICATION_ID }}
         PROSPECTOR_BOT_TOKEN: ${{ secrets.PROSPECTOR_BOT_TOKEN }}
         PROSPECTOR_LAMBDA_EXECUTION_ROLE: ${{ secrets.PROSPECTOR_LAMBDA_EXECUTION_ROLE }}
         PROSPECTOR_PUBLIC_KEY: ${{ secrets.PROSPECTOR_PUBLIC_KEY }}
+    - name: Build
+      run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
