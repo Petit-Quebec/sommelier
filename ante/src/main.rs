@@ -14,8 +14,8 @@ async fn main() {
     let response = register_command(&request).await;
 
     match response {
-        Ok(()) => println!("ok"),
+        Ok(()) => println!("Successfully created DIG command."),
 
-        Err(_) => println!("err"),
+        Err(err) => println!("Failed to create DIG command: {}", err),
     }
 }

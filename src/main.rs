@@ -8,6 +8,8 @@ use crate::app::interactions::InteractionRequest;
 
 mod app;
 
+const APPLICATION_PUBLIC_KEY: &str = env!("PROSPECTOR_PUBLIC_KEY");
+
 /// Takes in a json request body, returns a json response body
 fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
     tracing::info!({ %request_json }, "Handling request json");
@@ -24,7 +26,7 @@ fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
 }
 
 fn function_handler_helper(event: &Request) -> Result<String, StatusCode> {
-    let application_public_key: [u8; PUBLIC_KEY_LENGTH] = hex::decode(&env!("NYOOMIO_PUBLIC_KEY"))
+    let application_public_key: [u8; PUBLIC_KEY_LENGTH] = hex::decode(&APPLICATION_PUBLIC_KEY)
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .try_into()
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
