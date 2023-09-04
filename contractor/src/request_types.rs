@@ -4,6 +4,5 @@ use serde::Serialize;
 pub struct RegistrationRequest {
     pub name: String,
     pub r#type: u32,
-    pub description: String
+    pub description: String,
 }
-
