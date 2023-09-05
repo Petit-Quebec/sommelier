@@ -15,9 +15,9 @@ Contains the main Prospector logic of the bot. This module is set up as an [AWS 
 
 ## Environment Setup
 
-To deploy this app, you will need [Cargo](https://github.com/rust-lang/cargo) >= 1.71.0 and [Cargo Lambda](https://www.cargo-lambda.info/) >= 0.20.1. You will also need your (AWS CLI to be properly configured)[https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html]. 
+To deploy this app, you will need [Cargo](https://github.com/rust-lang/cargo) >= 1.71.0 and [Cargo Lambda](https://www.cargo-lambda.info/) >= 0.20.1. You will also need your [AWS CLI to be properly configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html). 
 
-You will also need an application with a bot user in the (Discord Developer Portal)[https://discord.com/developers/applications]. 
+You will also need an application with a bot user in the [Discord Developer Portal](https://discord.com/developers/applications). 
 
 You will also need the following environment variables: 
 - `PROSPECTOR_PUBLIC_KEY`
@@ -29,7 +29,7 @@ The first three of these can be found in the Discord Developer Portal, and the l
 
 ## Building and Running
 
-This project uses Rust's package manager, [https://doc.rust-lang.org/cargo/](Cargo), to abstract away most of the complications of the build process. To build the project, run `cargo build`. To test the project, run `cargo test`. 
+This project uses Rust's package manager, [Cargo](https://doc.rust-lang.org/cargo/), to abstract away most of the complications of the build process. To build the project, run `cargo build`. To test the project, run `cargo test`. 
 
 To deploy the project, run `bash deploy.sh`, which builds the project, and then deploys it to a lambda named `prospector`. 
 
