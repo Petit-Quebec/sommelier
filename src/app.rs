@@ -1,6 +1,6 @@
-use crate::app::interactions::*;
-use crate::app::InteractionCallbackType::*;
-use crate::app::InteractionType::*;
+use interactions::InteractionCallbackType::*;
+use interactions::InteractionType::*;
+use interactions::*;
 
 pub mod interactions;
 
