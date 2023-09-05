@@ -9,9 +9,6 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 pub enum InteractionType {
     Ping = 1,
     ApplicationCommand = 2,
-    MessageComponent = 3,
-    ApplicationCommandAutocomplete = 4,
-    ModalSubmit = 5,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
@@ -42,11 +39,6 @@ pub struct InteractionMetadata {
 pub enum InteractionCallbackType {
     Pong = 1,
     ChannelMessageWithSource = 4,
-    DeferredChannelMessageWithSource = 5,
-    DefferedUpdateMessage = 6,
-    UpdateMessage = 7,
-    ApplicationCommandAutocompleteResult = 8,
-    Modal = 9,
 }
 
 #[derive(Serialize, PartialEq, Debug)]

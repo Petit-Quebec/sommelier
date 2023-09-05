@@ -30,13 +30,6 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
                 data: Some(result_data),
             }
         }
-
-        _ => InteractionResponse {
-            r#type: ChannelMessageWithSource,
-            data: Some(InteractionCallbackData {
-                content: Some("response text".to_string()),
-            }),
-        },
     }
 }
 
