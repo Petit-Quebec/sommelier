@@ -3,10 +3,12 @@
  * response according to application rules.
  */
 
+use do_dig::dig;
 use interactions::InteractionCallbackType::*;
 use interactions::InteractionType::*;
 use interactions::*;
 
+mod do_dig;
 pub mod interactions;
 
 fn generate_error_response() -> InteractionResponse {
@@ -38,12 +40,7 @@ fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
     match generate_metadata(request) {
         Some(metadata) => {
-            let callback_data = InteractionCallbackData {
-                content: Some(format!(
-                    "u: {}, c: {}, g: {}",
-                    metadata.user_id, metadata.channel_id, metadata.guild_id
-                )),
-            };
+            let callback_data = dig(&metadata);
 
             InteractionResponse {
                 r#type: ChannelMessageWithSource,
