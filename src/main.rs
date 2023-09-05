@@ -91,10 +91,18 @@ fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
         Ok(interaction) => {
             let interaction_response = handle_interaction(&interaction);
 
-            Ok(json!(interaction_response).to_string())
+            let response_json = json!(interaction_response).to_string();
+
+            tracing::info!({ %response_json }, "Returning response json");
+
+            Ok(response_json)
         }
 
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(_) => {
+            tracing::info!("Error processing request.");
+
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 
