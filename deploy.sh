@@ -1,2 +1,2 @@
 cargo lambda build --release
-cargo lambda deploy prospector --iam-role $LAMBDA_EXECUTION_ROLE
+cargo lambda deploy prospector --iam-role $PROSPECTOR_LAMBDA_EXECUTION_ROLE
