@@ -33,6 +33,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     match function_handler_helper(&event) {
         Ok(response) => Ok(Response::builder()
             .status(StatusCode::OK)
+            .header("Content-Type", "application/json")
             .body(response.into())
             .unwrap()),
 
@@ -72,8 +73,6 @@ fn function_handler_helper(event: &Request) -> Result<String, StatusCode> {
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let body = std::str::from_utf8(event.body()).map_err(|_| StatusCode::BAD_REQUEST)?;
-
-    tracing::info!({ %body }, "Handling request json");
 
     let msg = (timestamp.to_owned() + body).into_bytes();
 

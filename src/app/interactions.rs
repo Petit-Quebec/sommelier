@@ -1,9 +1,19 @@
+/*!
+ * Discord interaction request and response types. These are serializable data structures that
+ * match the JSON structure established by the Discord API.
+ */
+
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-/*
- * Request Types
- */
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct InteractionRequest {
+    pub id: String,
+    pub application_id: String,
+    pub r#type: InteractionType,
+    pub data: Option<InteractionData>,
+}
+
 #[derive(Deserialize_repr, PartialEq, Debug)]
 #[repr(u8)]
 pub enum InteractionType {
@@ -16,14 +26,6 @@ pub struct InteractionData {
     pub name: String,
 }
 
-#[derive(Deserialize, PartialEq, Debug)]
-pub struct InteractionRequest {
-    pub id: String,
-    pub application_id: String,
-    pub r#type: InteractionType,
-    pub data: Option<InteractionData>,
-}
-
 #[derive(PartialEq, Debug)]
 pub struct InteractionMetadata {
     pub user_id: Option<String>,
@@ -31,9 +33,12 @@ pub struct InteractionMetadata {
     pub guild_id: Option<String>,
 }
 
-/*
- * Response Types
- */
+#[derive(Serialize, PartialEq, Debug)]
+pub struct InteractionResponse {
+    pub r#type: InteractionCallbackType,
+    pub data: Option<InteractionCallbackData>,
+}
+
 #[derive(Serialize_repr, PartialEq, Debug)]
 #[repr(u8)]
 pub enum InteractionCallbackType {
@@ -44,10 +49,4 @@ pub enum InteractionCallbackType {
 #[derive(Serialize, PartialEq, Debug)]
 pub struct InteractionCallbackData {
     pub content: Option<String>,
-}
-
-#[derive(Serialize, PartialEq, Debug)]
-pub struct InteractionResponse {
-    pub r#type: InteractionCallbackType,
-    pub data: Option<InteractionCallbackData>,
 }
