@@ -1,3 +1,8 @@
+/*!
+ * Manages the interaction contract between the Discord client and the application backend. Adds
+ * new commands to this contract when requested.
+ */
+
 use request_types::RegistrationRequest;
 use reqwest::Client;
 use serde_json::json;

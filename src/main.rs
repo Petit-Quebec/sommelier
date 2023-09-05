@@ -1,3 +1,9 @@
+/*!
+ * Top level lambda handling for app. This module establishes a lambda handler that takes in an
+ * http request representing a Discord interaction, verifies its authenticity using a public key,
+ * and then returns an http response corresponding to the resulting Discord interaction callback.
+ */
+
 use ed25519_dalek::{Signature, Verifier, VerifyingKey, PUBLIC_KEY_LENGTH};
 use lambda_http::http::StatusCode;
 use lambda_http::{run, service_fn, Body, Error, Request, Response};
@@ -10,18 +16,30 @@ mod app;
 
 const APPLICATION_PUBLIC_KEY: &str = env!("PROSPECTOR_PUBLIC_KEY");
 
-/// Takes in a json request body, returns a json response body
-fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
-    tracing::info!({ %request_json }, "Handling request json");
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        // disable printing the name of the module in every log line.
+        .with_target(false)
+        // disabling time is handy because CloudWatch will add the ingestion time.
+        .without_time()
+        .init();
 
-    match serde_json::from_str::<InteractionRequest>(request_json) {
-        Ok(interaction) => {
-            let interaction_response = handle_interaction(&interaction);
+    run(service_fn(function_handler)).await
+}
 
-            Ok(json!(interaction_response).to_string())
-        }
+async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
+    match function_handler_helper(&event) {
+        Ok(response) => Ok(Response::builder()
+            .status(StatusCode::OK)
+            .body(response.into())
+            .unwrap()),
 
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(code) => Ok(Response::builder()
+            .status(code)
+            .body("Error when handling request.".into())
+            .unwrap()),
     }
 }
 
@@ -66,31 +84,18 @@ fn function_handler_helper(event: &Request) -> Result<String, StatusCode> {
     }
 }
 
-async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
-    match function_handler_helper(&event) {
-        Ok(response) => Ok(Response::builder()
-            .status(StatusCode::OK)
-            .body(response.into())
-            .unwrap()),
+fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
+    tracing::info!({ %request_json }, "Handling request json");
 
-        Err(code) => Ok(Response::builder()
-            .status(code)
-            .body("Error when handling request.".into())
-            .unwrap()),
+    match serde_json::from_str::<InteractionRequest>(request_json) {
+        Ok(interaction) => {
+            let interaction_response = handle_interaction(&interaction);
+
+            Ok(json!(interaction_response).to_string())
+        }
+
+        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
     }
-}
-
-#[tokio::main]
-async fn main() -> Result<(), Error> {
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        // disable printing the name of the module in every log line.
-        .with_target(false)
-        // disabling time is handy because CloudWatch will add the ingestion time.
-        .without_time()
-        .init();
-
-    run(service_fn(function_handler)).await
 }
 
 #[cfg(test)]

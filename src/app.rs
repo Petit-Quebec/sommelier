@@ -1,3 +1,8 @@
+/*!
+ * Drives the main application logic. Takes in a Discord interaction request, and returns a
+ * response according to application rules.
+ */
+
 use interactions::InteractionCallbackType::*;
 use interactions::InteractionType::*;
 use interactions::*;
