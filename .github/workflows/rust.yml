@@ -1,4 +1,4 @@
-name: Rust
+name: BotTests
 
 on:
   push:
@@ -8,9 +8,13 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  PROSPECTOR_APPLICATION_ID: ${{ secrets.PROSPECTOR_APPLICATION_ID }}
+  PROSPECTOR_BOT_TOKEN: ${{ secrets.PROSPECTOR_BOT_TOKEN }}
+  PROSPECTOR_LAMBDA_EXECUTION_ROLE: ${{ secrets.PROSPECTOR_LAMBDA_EXECUTION_ROLE }}
+  PROSPECTOR_PUBLIC_KEY: ${{ secrets.PROSPECTOR_PUBLIC_KEY }}
 
 jobs:
-  build:
+  build_and_test:
 
     runs-on: ubuntu-latest
 
@@ -18,7 +22,5 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose
-      env:
-        NYOOMIO_PUBLIC_KEY: ${{ secrets.NYOOMIO_PUBLIC_KEY }}
     - name: Run tests
       run: cargo test --verbose
