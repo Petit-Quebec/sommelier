@@ -1,7 +1,0 @@
-{
-"httpMethod": "GET",
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "body": "{\"id\":\"hi\",\"application_id\":\"34314\",\"type\":13}"
-}
