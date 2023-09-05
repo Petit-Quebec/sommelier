@@ -9,10 +9,6 @@ use interactions::*;
 
 pub mod interactions;
 
-const UNKNOWN_USER: &str = "unknown user";
-const UNKNOWN_CHANNEL: &str = "unknown channel";
-const UNKNOWN_GUILD: &str = "unknown guild";
-
 fn generate_error_response() -> InteractionResponse {
     let msg = "Something mysterious happened...".to_string();
 
@@ -26,16 +22,13 @@ fn generate_error_response() -> InteractionResponse {
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
-        Ping => InteractionResponse {
-            r#type: Pong,
-            data: None,
-        },
+        Ping => handle_ping(request),
 
         ApplicationCommand => handle_application_command(request),
     }
 }
 
-fn handle_ping(request: &InteractionRequest) -> InteractionResponse {
+fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
     InteractionResponse {
         r#type: Pong,
         data: None,
@@ -63,7 +56,7 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
 }
 
 fn generate_metadata(request: &InteractionRequest) -> Option<InteractionMetadata> {
-    let user_id: &String = &request.user.as_ref()?.id;
+    let user_id: &String = &request.member.as_ref()?.user.as_ref()?.id;
 
     let channel_id: &String = request.channel_id.as_ref()?;
 
@@ -94,8 +87,10 @@ mod tests {
             data: data,
             guild_id: Some("DEBUG_GUILD_ID".to_string()),
             channel_id: Some("DEBUG_CHANNEL_ID".to_string()),
-            user: Some(User {
-                id: "DEBUG_USER_ID".to_string(),
+            member: Some(GuildMember {
+                user: Some(User {
+                    id: "DEBUG_USER_ID".to_string(),
+                }),
             }),
         }
     }
