@@ -12,6 +12,9 @@ pub struct InteractionRequest {
     pub application_id: String,
     pub r#type: InteractionType,
     pub data: Option<InteractionData>,
+    pub guild_id: Option<String>,
+    pub channel_id: Option<String>,
+    pub user: Option<User>,
 }
 
 #[derive(Deserialize_repr, PartialEq, Debug)]
@@ -26,11 +29,16 @@ pub struct InteractionData {
     pub name: String,
 }
 
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct User {
+    pub id: String,
+}
+
 #[derive(PartialEq, Debug)]
-pub struct InteractionMetadata {
-    pub user_id: Option<String>,
-    pub channel_id: Option<String>,
-    pub guild_id: Option<String>,
+pub struct InteractionMetadata<'a> {
+    pub user_id: &'a String,
+    pub channel_id: &'a String,
+    pub guild_id: &'a String,
 }
 
 #[derive(Serialize, PartialEq, Debug)]
