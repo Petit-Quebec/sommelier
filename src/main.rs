@@ -4,15 +4,16 @@
  * and then returns an http response corresponding to the resulting Discord interaction callback.
  */
 
+mod app;
+mod interactions;
+
 use ed25519_dalek::{Signature, Verifier, VerifyingKey, PUBLIC_KEY_LENGTH};
 use lambda_http::http::StatusCode;
 use lambda_http::{run, service_fn, Body, Error, Request, Response};
 use serde_json::json;
 
 use crate::app::handle_interaction;
-use crate::app::interactions::InteractionRequest;
-
-mod app;
+pub use crate::interactions::InteractionRequest;
 
 const APPLICATION_PUBLIC_KEY: &str = env!("PROSPECTOR_PUBLIC_KEY");
 

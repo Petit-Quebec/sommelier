@@ -3,13 +3,12 @@
  * response according to application rules.
  */
 
-use do_dig::dig;
-use interactions::InteractionCallbackType::*;
-use interactions::InteractionType::*;
-use interactions::*;
-
 mod do_dig;
-pub mod interactions;
+
+use crate::interactions::InteractionCallbackType::*;
+use crate::interactions::InteractionType::*;
+use crate::interactions::*;
+use do_dig::dig;
 
 fn generate_error_response() -> InteractionResponse {
     let msg = "Something mysterious happened...".to_string();
