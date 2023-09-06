@@ -19,7 +19,8 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
 }
 
 fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
-    InteractionResponse {
+    InteractionResponse
+    {
         r#type: Pong,
         data: None,
     }
