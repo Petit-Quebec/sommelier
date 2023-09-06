@@ -23,9 +23,10 @@ You will also need the following environment variables:
 - `PROSPECTOR_PUBLIC_KEY`
 - `PROSPECTOR_APPLICATION_ID`
 - `PROSPECTOR_BOT_TOKEN`
+- `PROSPECTOR_SALT`
 - `PROSPECTOR_LAMBDA_EXECUTION_ROLE`
 
-The first three of these can be found in the Discord Developer Portal, and the last should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. 
+The first three of these can be found in the Discord Developer Portal. The `PROSPECTOR_SALT` can be any string; this string will determine the identity of all game entities. `PROSPECTOR_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. 
 
 ## Building and Running
 

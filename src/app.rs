@@ -4,11 +4,13 @@
  */
 
 mod do_dig;
+mod hashing;
 
 use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
 use do_dig::dig;
+pub use hashing::hash_location;
 
 fn generate_error_response() -> InteractionResponse {
     let msg = "Something mysterious happened...".to_string();
@@ -113,17 +115,12 @@ mod tests {
 
         let req = anonymous_request(ApplicationCommand, Some(req_data));
 
-        let expected_resp_data = InteractionCallbackData {
-            content: Some("u: DEBUG_USER_ID, c: DEBUG_CHANNEL_ID, g: DEBUG_GUILD_ID".to_string()),
-        };
-
-        let expected_resp = InteractionResponse {
-            r#type: ChannelMessageWithSource,
-            data: Some(expected_resp_data),
-        };
-
         let resp = handle_interaction(&req);
 
-        assert_eq!(resp, expected_resp);
+        assert!(matches!(resp.r#type, ChannelMessageWithSource));
+        assert!(matches!(
+            resp.data,
+            Some(InteractionCallbackData { content: Some(_) })
+        ));
     }
 }
