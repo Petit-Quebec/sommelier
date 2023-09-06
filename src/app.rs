@@ -27,16 +27,24 @@ fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
 
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
     let callback_data = match &request.data {
-        Some(interaction_data) => deedee(&interaction_data),
+        Some(interaction_data) => match interaction_data.name.as_str() {
+            "deedee" => deedee(&interaction_data),
 
-        None => InteractionCallbackData {
-            content: Some("Could not recognize command.".to_string()),
+            _ => make_error_callback_data(),
         },
+
+        None => make_error_callback_data(),
     };
 
     InteractionResponse {
         r#type: ChannelMessageWithSource,
         data: Some(callback_data),
+    }
+}
+
+fn make_error_callback_data() -> InteractionCallbackData {
+    InteractionCallbackData {
+        content: Some("Could not recognize command.".to_string()),
     }
 }
 
