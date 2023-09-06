@@ -9,8 +9,8 @@ use serde_json::json;
 
 pub mod request_types;
 
-const APPLICATION_ID: &str = env!("PROSPECTOR_APPLICATION_ID");
-const BOT_TOKEN: &str = env!("PROSPECTOR_BOT_TOKEN");
+const APPLICATION_ID: &str = env!("SOMMELIER_APPLICATION_ID");
+const BOT_TOKEN: &str = env!("SOMMELIER_BOT_TOKEN");
 
 pub async fn register_command(req: &RegistrationRequest) -> Result<(), String> {
     let client = Client::new();

@@ -15,7 +15,7 @@ use serde_json::json;
 use crate::app::handle_interaction;
 pub use crate::interactions::InteractionRequest;
 
-const APPLICATION_PUBLIC_KEY: &str = env!("PROSPECTOR_PUBLIC_KEY");
+const APPLICATION_PUBLIC_KEY: &str = env!("SOMMELIER_PUBLIC_KEY");
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
