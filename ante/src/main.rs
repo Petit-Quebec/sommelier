@@ -1,6 +1,5 @@
 /*!
- * Primes the application by registering the initial global request. This script should only need
- * to be run once.
+ * Script to set global commands.
  */
 
 use contractor::register_command;
@@ -9,16 +8,16 @@ use contractor::request_types::RegistrationRequest;
 #[tokio::main]
 async fn main() {
     let request = RegistrationRequest {
-        name: "dig".to_string(),
+        name: "deedee".to_string(),
         r#type: 1,
-        description: "Try your luck!".to_string(),
+        description: "what's a deedee?".to_string(),
     };
 
     let response = register_command(&request).await;
 
     match response {
-        Ok(()) => println!("Successfully created DIG command."),
+        Ok(()) => println!("Successfully created DEEDEE command."),
 
-        Err(err) => println!("Failed to create DIG command: {}", err),
+        Err(err) => println!("Failed to create DEEDEE command: {}", err),
     }
 }

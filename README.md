@@ -1,17 +1,17 @@
-# Prospector
-A Discord exploration bot, focused on mapping Discord objects to a discoverable game world, allowing users to incrementally explore a fantasy world embedded in their familiar servers, channels, and users.
+# Sommelier
+A Discord bot written in Rust. The goal of this bot is _not_ to create an amazing piece of software, but to just have fun with friends and have something fun to work on.
 
 ## Modules
 This is a brief description of the three modules of this project. The first two are named folders in the root of this directory, and the third (main module) is contained in the **src** directory.
 
 ### Ante
-Startup script required to initialize the [Discord Application Commands](https://discord.com/developers/docs/interactions/application-commands) required by Prospector. This module requires the use of the **contractor** module to manage commands.
+Startup script required to initialize the [Discord Application Commands](https://discord.com/developers/docs/interactions/application-commands) required by Sommelier. This module requires the use of the **contractor** module to manage commands.
 
 ### Contractor
-Contractor is a library responsible for managing the set of allowed [Discord Application Commands](https://discord.com/developers/docs/interactions/application-commands) associated with Prospector.
+Contractor is a library responsible for managing the set of allowed [Discord Application Commands](https://discord.com/developers/docs/interactions/application-commands) associated with Sommelier.
 
-### Prospector
-Contains the main Prospector logic of the bot. This module is set up as an [AWS Lambda](https://aws.amazon.com/lambda/), which takes in a user Discord interaction, and returns the appropriate response. See [this documentation](https://discord.com/developers/docs/interactions/receiving-and-responding) for more on Discord interaction structure.
+### Sommelier
+Contains the main Sommelier logic of the bot. This module is set up as an [AWS Lambda](https://aws.amazon.com/lambda/), which takes in a user Discord interaction, and returns the appropriate response. See [this documentation](https://discord.com/developers/docs/interactions/receiving-and-responding) for more on Discord interaction structure.
 
 ## Environment Setup
 
@@ -20,18 +20,17 @@ To deploy this app, you will need [Cargo](https://github.com/rust-lang/cargo) >=
 You will also need an application with a bot user in the [Discord Developer Portal](https://discord.com/developers/applications). 
 
 You will also need the following environment variables: 
-- `PROSPECTOR_PUBLIC_KEY`
-- `PROSPECTOR_APPLICATION_ID`
-- `PROSPECTOR_BOT_TOKEN`
-- `PROSPECTOR_SALT`
-- `PROSPECTOR_LAMBDA_EXECUTION_ROLE`
+- `SOMMELIER_PUBLIC_KEY`
+- `SOMMELIER_APPLICATION_ID`
+- `SOMMELIER_BOT_TOKEN`
+- `SOMMELIER_LAMBDA_EXECUTION_ROLE`
 
-The first three of these can be found in the Discord Developer Portal. The `PROSPECTOR_SALT` can be any string; this string will determine the identity of all game entities. `PROSPECTOR_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. 
+The first three of these can be found in the Discord Developer Portal. `SOMMELIER_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. 
 
 ## Building and Running
 
 This project uses Rust's package manager, [Cargo](https://doc.rust-lang.org/cargo/), to abstract away most of the complications of the build process. To build the project, run `cargo build`. To test the project, run `cargo test`. 
 
-To deploy the project, run `bash deploy.sh`, which builds the project, and then deploys it to a lambda named `prospector`. 
+To deploy the project, run `bash deploy.sh`, which builds the project, and then deploys it to a lambda named `sommelier`. 
 
 To run just the **ante** module, which initializes the discord bot, run `cargo run -p ante`. Make sure to deploy your bot before running this script, or else the Discord backend may reject your command initialization.
