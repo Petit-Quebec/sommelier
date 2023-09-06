@@ -1,8 +1,14 @@
 # Sommelier
-A Discord bot written in Rust. The goal of this bot is _not_ to create an amazing piece of software, but to just have fun with friends and have something fun to work on.
+A Discord bot written in Rust, to be deployed in a matching "Kitchen" server. The goal of this bot is _not_ to create an amazing piece of software, but to just have fun with friends and have something fun to work on in an interesting language. 
 
-## Modules
-This is a brief description of the three modules of this project. The first two are named folders in the root of this directory, and the third (main module) is contained in the **src** directory.
+## Rust
+Before contributing, you should be familiar with the first 6 chapters of [the Rust Book](https://doc.rust-lang.org/book/), which is a well-written guide on the core language elements of Rust.
+
+## Contributing to Sommelier
+Sommelier is intended to be an open space to experiment with Rust in a Discord bot setting. To contribute, you should open a pull request with passing tests that illustrate the functionality of your contribution. 
+
+## Code Modules
+A brief description of the three modules of this project. The first two are named folders in the root of this directory, and the third (main module) is contained in the **src** directory.
 
 ### Ante
 Startup script required to initialize the [Discord Application Commands](https://discord.com/developers/docs/interactions/application-commands) required by Sommelier. This module requires the use of the **contractor** module to manage commands.
@@ -12,6 +18,9 @@ Contractor is a library responsible for managing the set of allowed [Discord App
 
 ### Sommelier
 Contains the main Sommelier logic of the bot. This module is set up as an [AWS Lambda](https://aws.amazon.com/lambda/), which takes in a user Discord interaction, and returns the appropriate response. See [this documentation](https://discord.com/developers/docs/interactions/receiving-and-responding) for more on Discord interaction structure.
+
+# DIY
+If you only want to contribute code, ignore this part- [tarinyoom](https://github.com/tarinyoom/) will be managing the deployment of an instance of this bot. If you want to deploy your own version of the bot, continue onwards.
 
 ## Environment Setup
 
