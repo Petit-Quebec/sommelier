@@ -2,8 +2,8 @@
  * Implementation of "deedee" command.
  */
 
-use crate::app::InteractionCallbackData;
-use crate::app::InteractionData;
+use crate::InteractionCallbackData;
+use crate::InteractionData;
 
 pub fn deedee(_: &InteractionData) -> InteractionCallbackData {
     InteractionCallbackData {

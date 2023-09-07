@@ -3,12 +3,13 @@
  * response according to application rules.
  */
 
-mod do_deedee;
+mod handlers;
+pub mod interactions;
 
 use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use do_deedee::deedee;
+use handlers::deedee;
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
