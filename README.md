@@ -12,6 +12,7 @@ One of the most immediately noticeable features of Rust is the Rust compiler, wh
 - `cargo test`, to test the project
 - `cargo fmt`, to format the project's code to conform to some standard
 - `cargo help`, to get more cargo commands.
+
 To develop on this app, you will need Cargo >= 1.71.0.
 
 # If you want to write code...
