@@ -22,7 +22,13 @@ jobs:
     - uses: actions/checkout@v3
     - name: Check Formatting
       run: cargo fmt --check
-    - name: Build
+    - name: Build App
       run: cargo build --verbose
-    - name: Run Tests
+    - name: Build Lambda
+      run: cargo build -p lambda --verbose
+    - name: Build Ante
+      run: cargo build -p ante --verbose
+    - name: Test App
       run: cargo test --verbose
+    - name: Test Lambda
+      run: cargo test -p lambda --verbose
