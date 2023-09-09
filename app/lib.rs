@@ -69,6 +69,7 @@ mod tests {
                 user: Some(User {
                     id: "DEBUG_USER_ID".to_string(),
                 }),
+                nick: Some("DEBUG_NICKNAME".to_string()),
             }),
         }
     }

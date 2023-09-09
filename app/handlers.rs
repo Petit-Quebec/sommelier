@@ -1,3 +1,3 @@
-pub mod do_deedee;
+mod do_deedee;
 
 pub use do_deedee::deedee;

@@ -32,6 +32,7 @@ pub struct InteractionData {
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct GuildMember {
     pub user: Option<User>,
+    pub nick: Option<String>,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
