@@ -48,7 +48,7 @@ If something goes wrong, then it will change to:
 
 ![image](https://github.com/Petit-Quebec/sommelier/assets/36433367/1cfbe566-cc92-429f-bd06-37d3956368ec)
 
-These checks verify that things are going "the way they should". If you've satisfied all of these criteria (testing coverage, minimality, CI passing) then your PR will be merged in. 
+These checks verify that things are going "the way they should". If you've satisfied all of these criteria (testing coverage, minimality, CI passing) then your PR will be merged in. Example "hello world" PR here: https://github.com/Petit-Quebec/sommelier/pull/1
 
 # If you want to deploy your own Sommelier...
 
