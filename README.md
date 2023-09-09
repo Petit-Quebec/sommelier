@@ -20,9 +20,35 @@ To develop on this app, you will need Cargo >= 1.71.0.
 ## Just modify the code in the `app/` folder
 Most of the rest of the files in this repository have to do with file organization, project building, or project deployment. So if you just want to add functionality to the bot itself, you can focus your efforts to that folder. Once you've added some functionality to the bot, open a pull request (PR), and it will be deployed for you. 
 
-## PR Requirements
-- PR must include tests that summarize the behavior of this addition
-- PR must satisfy CI, which runs checks formatting, building, and tests
+## Pull Request Requirements
+Even though this project is just for fun, we do need to enforce some level of regularity. The following three criteria are three very general acceptance criteria for pull requests (PRs).
+
+### Testing Coverage
+The PR must include tests that fully characterize and verify the functionality of the added command. 
+
+### Minimality
+This PR is minimal, in the sense that there isn't any way to remove logic to achieve the same level of functionality and test coverage. Of course, this judgment is somewhat subjective, but the point is that there isn't a ton of extra fluff.
+
+### CI Passing
+The PR must pass CI tests, which require that the code must:
+
+- build, which you can test locally using `cargo build`
+- pass all tests, which you can tests locally using `cargo test`
+- be well formatted, which you can do by using `cargo fmt` before committing code
+
+When you open a PR, there will be a notice on the PR that looks like:
+
+![image](https://github.com/Petit-Quebec/sommelier/assets/36433367/ffbe403b-3c5d-4736-890e-daf9f9c93d42)
+
+If everything goes well with the CI tests, then it will change to:
+
+![image](https://github.com/Petit-Quebec/sommelier/assets/36433367/3c70a725-4ae0-4939-b8ee-021157bafcbe)
+
+If something goes wrong, then it will change to:
+
+![image](https://github.com/Petit-Quebec/sommelier/assets/36433367/1cfbe566-cc92-429f-bd06-37d3956368ec)
+
+These checks verify that things are going "the way they should". If you've satisfied all of these criteria (testing coverage, minimality, CI passing) then your PR will be merged in. 
 
 # If you want to deploy your own Sommelier...
 
