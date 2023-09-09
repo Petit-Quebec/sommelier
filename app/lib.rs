@@ -10,6 +10,7 @@ use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
 use handlers::deedee;
+use handlers::hello;
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -30,6 +31,8 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
     let callback_data = match &request.data {
         Some(interaction_data) => match interaction_data.name.as_str() {
             "deedee" => deedee(&interaction_data),
+
+            "hello" => hello(&request.member),
 
             _ => make_error_callback_data(),
         },
@@ -108,5 +111,41 @@ mod tests {
         };
 
         assert_eq!(resp, expected_resp);
+    }
+
+    #[test]
+    fn test_hello() {
+        let member_guildless = None;
+
+        assert_eq!(
+            hello(&member_guildless),
+            InteractionCallbackData {
+                content: Some("Hello, stranger!".to_string()),
+            }
+        );
+
+        let member_nickless = Some(GuildMember {
+            user: None,
+            nick: None,
+        });
+
+        assert_eq!(
+            hello(&member_nickless),
+            InteractionCallbackData {
+                content: Some("Hello, friend!".to_string()),
+            }
+        );
+
+        let member_with_nickname = Some(GuildMember {
+            user: None,
+            nick: Some("Nicky".to_string()),
+        });
+
+        assert_eq!(
+            hello(&member_with_nickname),
+            InteractionCallbackData {
+                content: Some("Hello, Nicky!".to_string()),
+            }
+        );
     }
 }
