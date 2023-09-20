@@ -10,6 +10,7 @@ use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
 use handlers::deedee;
+use handlers::game_of_life;
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -30,6 +31,8 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
     let callback_data = match &request.data {
         Some(interaction_data) => match interaction_data.name.as_str() {
             "deedee" => deedee(&interaction_data),
+
+            "conway" => game_of_life(&interaction_data),
 
             _ => make_error_callback_data(),
         },
@@ -53,6 +56,7 @@ fn make_error_callback_data() -> InteractionCallbackData {
 mod tests {
 
     use super::*;
+    use handlers::SIZE;
 
     fn anonymous_request(
         r#type: InteractionType,
@@ -108,5 +112,29 @@ mod tests {
         };
 
         assert_eq!(resp, expected_resp);
+    }
+
+    #[test]
+    fn test_conway() {
+        let req_data = InteractionData {
+            name: "conway".to_string(),
+        };
+
+        let req = anonymous_request(ApplicationCommand, Some(req_data));
+
+        let resp = handle_interaction(&req);
+
+        let content = resp
+            .data
+            .expect("no data in response!")
+            .content
+            .expect("no content in data!");
+
+        let resp_emoji_count = content.matches("🌝").count() + content.matches("🌚").count();
+
+        let expected_emoji_count = SIZE.pow(2) * 2;
+
+        println!("{}", content);
+        assert_eq!(expected_emoji_count, resp_emoji_count);
     }
 }
