@@ -9,6 +9,7 @@ pub mod interactions;
 use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
+use handlers::buttons;
 use handlers::deedee;
 use handlers::game_of_life;
 
@@ -30,9 +31,11 @@ fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
     let callback_data = match &request.data {
         Some(interaction_data) => match interaction_data.name.as_str() {
-            "deedee" => deedee(&interaction_data),
-
+            "buttons" => buttons(&interaction_data),
+            
             "conway" => game_of_life(&interaction_data),
+            
+            "deedee" => deedee(&interaction_data),
 
             _ => make_error_callback_data(),
         },
@@ -49,6 +52,8 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
 fn make_error_callback_data() -> InteractionCallbackData {
     InteractionCallbackData {
         content: Some("Could not recognize command.".to_string()),
+        components: Vec::new(),
+        flags: Some(MessageFlags::Ephemeral),
     }
 }
 
@@ -104,6 +109,8 @@ mod tests {
 
         let expected_resp_data = InteractionCallbackData {
             content: Some("mega doo doo".to_string()),
+            components: Vec::new(),
+            flags: Some(MessageFlags::Ephemeral),
         };
 
         let expected_resp = InteractionResponse {

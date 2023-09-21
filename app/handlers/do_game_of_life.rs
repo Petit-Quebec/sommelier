@@ -1,5 +1,4 @@
-use crate::InteractionCallbackData;
-use crate::InteractionData;
+use crate::{InteractionCallbackData, InteractionData, MessageFlags};
 use rand;
 
 pub const SIZE: usize = 10;
@@ -79,5 +78,7 @@ pub fn game_of_life(_: &InteractionData) -> InteractionCallbackData {
 
     InteractionCallbackData {
         content: Some(output.to_string()),
+        components: Vec::new(),
+        flags: Some(MessageFlags::Ephemeral),
     }
 }

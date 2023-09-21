@@ -59,8 +59,30 @@ pub enum InteractionCallbackType {
     Pong = 1,
     ChannelMessageWithSource = 4,
 }
-
 #[derive(Serialize, PartialEq, Debug)]
 pub struct InteractionCallbackData {
     pub content: Option<String>,
+    pub flags: Option<MessageFlags>,
+    pub components: Vec<Component>,
 }
+
+#[derive(Serialize, PartialEq, Debug)]
+pub struct Component {
+    pub r#type: ComponentType,
+    pub components: Option<Vec<Component>>,
+    pub label: Option<String>,
+}
+
+#[derive(Serialize_repr, PartialEq, Debug)]
+#[repr(u8)]
+pub enum ComponentType {
+    ActionRow = 1,
+    Button = 2,
+}
+
+#[derive(Serialize_repr, PartialEq, Debug)]
+#[repr(u16)]
+pub enum MessageFlags {
+    Ephemeral = 64,
+}
+
