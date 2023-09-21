@@ -9,9 +9,9 @@ pub mod interactions;
 use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use handlers::buttons;
 use handlers::deedee;
 use handlers::game_of_life;
+use handlers::{buttons, buttons_minus_one, buttons_plus_one};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -59,6 +59,18 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
     let callback_data = match &request.data {
         Some(interaction_data) => match &interaction_data.custom_id {
             Some(id) => match id.as_str() {
+                "buttons_+1" => {
+                    let old = &request.message.as_ref().unwrap().content;
+
+                    buttons_plus_one(old)
+                }
+
+                "buttons_-1" => {
+                    let old = &request.message.as_ref().unwrap().content;
+
+                    buttons_minus_one(old)
+                }
+
                 "cgol" => game_of_life(&interaction_data),
 
                 "deedee" => deedee(&interaction_data),
@@ -108,6 +120,9 @@ mod tests {
                     id: "DEBUG_USER_ID".to_string(),
                 }),
                 nick: Some("DEBUG_NICKNAME".to_string()),
+            }),
+            message: Some(Message {
+                content: "DEBUG_MESSAGE_CONTENT".to_string(),
             }),
         }
     }

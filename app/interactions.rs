@@ -15,6 +15,7 @@ pub struct InteractionRequest {
     pub guild_id: Option<String>,
     pub channel_id: Option<String>,
     pub member: Option<GuildMember>,
+    pub message: Option<Message>,
 }
 
 #[derive(Deserialize_repr, PartialEq, Debug)]
@@ -35,6 +36,11 @@ pub struct InteractionData {
 pub struct GuildMember {
     pub user: Option<User>,
     pub nick: Option<String>,
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct Message {
+    pub content: String,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
