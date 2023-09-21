@@ -11,12 +11,15 @@ use crate::interactions::InteractionType::*;
 use crate::interactions::*;
 use handlers::deedee;
 use handlers::game_of_life;
+use handlers::{buttons, buttons_minus_one, buttons_plus_one};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
         Ping => handle_ping(request),
 
         ApplicationCommand => handle_application_command(request),
+
+        MessageComponent => handle_message_component(request),
     }
 }
 
@@ -29,12 +32,18 @@ fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
 
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
     let callback_data = match &request.data {
-        Some(interaction_data) => match interaction_data.name.as_str() {
-            "deedee" => deedee(&interaction_data),
+        Some(interaction_data) => match &interaction_data.name {
+            Some(name) => match name.as_str() {
+                "buttons" => buttons(&interaction_data),
 
-            "conway" => game_of_life(&interaction_data),
+                "conway" => game_of_life(&interaction_data),
 
-            _ => make_error_callback_data(),
+                "deedee" => deedee(&interaction_data),
+
+                _ => make_error_callback_data(),
+            },
+
+            None => make_error_callback_data(),
         },
 
         None => make_error_callback_data(),
@@ -46,9 +55,46 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
     }
 }
 
+fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
+    let callback_data = match &request.data {
+        Some(interaction_data) => match &interaction_data.custom_id {
+            Some(id) => match id.as_str() {
+                "buttons_+1" => {
+                    let old = &request.message.as_ref().unwrap().content;
+
+                    buttons_plus_one(old)
+                }
+
+                "buttons_-1" => {
+                    let old = &request.message.as_ref().unwrap().content;
+
+                    buttons_minus_one(old)
+                }
+
+                "cgol" => game_of_life(&interaction_data),
+
+                "deedee" => deedee(&interaction_data),
+
+                _ => make_error_callback_data(),
+            },
+
+            None => make_error_callback_data(),
+        },
+
+        None => make_error_callback_data(),
+    };
+
+    InteractionResponse {
+        r#type: UpdateMessage,
+        data: Some(callback_data),
+    }
+}
+
 fn make_error_callback_data() -> InteractionCallbackData {
     InteractionCallbackData {
         content: Some("Could not recognize command.".to_string()),
+        components: Vec::new(),
+        flags: Some(MessageFlags::Ephemeral),
     }
 }
 
@@ -75,6 +121,9 @@ mod tests {
                 }),
                 nick: Some("DEBUG_NICKNAME".to_string()),
             }),
+            message: Some(Message {
+                content: "DEBUG_MESSAGE_CONTENT".to_string(),
+            }),
         }
     }
 
@@ -93,31 +142,35 @@ mod tests {
     }
 
     #[test]
-    fn test_deedee() {
+    fn test_buttons() {
         let req_data = InteractionData {
-            name: "deedee".to_string(),
+            name: Some("buttons".to_string()),
+            custom_id: None,
         };
 
         let req = anonymous_request(ApplicationCommand, Some(req_data));
 
         let resp = handle_interaction(&req);
 
-        let expected_resp_data = InteractionCallbackData {
-            content: Some("mega doo doo".to_string()),
-        };
+        let components = resp.data.unwrap().components;
 
-        let expected_resp = InteractionResponse {
-            r#type: ChannelMessageWithSource,
-            data: Some(expected_resp_data),
-        };
+        assert_eq!(components.len(), 1);
 
-        assert_eq!(resp, expected_resp);
+        let buttons = &components[0].components;
+
+        assert_eq!(buttons.len(), 4);
+
+        assert_eq!(buttons[0].r#type, ComponentType::Button);
+        assert_eq!(buttons[1].r#type, ComponentType::Button);
+        assert_eq!(buttons[2].r#type, ComponentType::Button);
+        assert_eq!(buttons[3].r#type, ComponentType::Button);
     }
 
     #[test]
     fn test_conway() {
         let req_data = InteractionData {
-            name: "conway".to_string(),
+            name: Some("conway".to_string()),
+            custom_id: None,
         };
 
         let req = anonymous_request(ApplicationCommand, Some(req_data));
@@ -136,5 +189,30 @@ mod tests {
 
         println!("{}", content);
         assert_eq!(expected_emoji_count, resp_emoji_count);
+    }
+
+    #[test]
+    fn test_deedee() {
+        let req_data = InteractionData {
+            name: Some("deedee".to_string()),
+            custom_id: None,
+        };
+
+        let req = anonymous_request(ApplicationCommand, Some(req_data));
+
+        let resp = handle_interaction(&req);
+
+        let expected_resp_data = InteractionCallbackData {
+            content: Some("mega doo doo".to_string()),
+            components: Vec::new(),
+            flags: Some(MessageFlags::Ephemeral),
+        };
+
+        let expected_resp = InteractionResponse {
+            r#type: ChannelMessageWithSource,
+            data: Some(expected_resp_data),
+        };
+
+        assert_eq!(resp, expected_resp);
     }
 }

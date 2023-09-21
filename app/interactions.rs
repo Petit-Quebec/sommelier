@@ -15,6 +15,7 @@ pub struct InteractionRequest {
     pub guild_id: Option<String>,
     pub channel_id: Option<String>,
     pub member: Option<GuildMember>,
+    pub message: Option<Message>,
 }
 
 #[derive(Deserialize_repr, PartialEq, Debug)]
@@ -22,17 +23,24 @@ pub struct InteractionRequest {
 pub enum InteractionType {
     Ping = 1,
     ApplicationCommand = 2,
+    MessageComponent = 3,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct InteractionData {
-    pub name: String,
+    pub name: Option<String>,
+    pub custom_id: Option<String>,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct GuildMember {
     pub user: Option<User>,
     pub nick: Option<String>,
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct Message {
+    pub content: String,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
@@ -58,9 +66,44 @@ pub struct InteractionResponse {
 pub enum InteractionCallbackType {
     Pong = 1,
     ChannelMessageWithSource = 4,
+    UpdateMessage = 7,
 }
-
 #[derive(Serialize, PartialEq, Debug)]
 pub struct InteractionCallbackData {
     pub content: Option<String>,
+    pub flags: Option<MessageFlags>,
+    pub components: Vec<ActionRow>,
+}
+
+#[derive(Serialize, PartialEq, Debug)]
+pub struct ActionRow {
+    pub r#type: ComponentType,
+    pub components: Vec<Button>,
+}
+
+#[derive(Serialize, PartialEq, Debug)]
+pub struct Button {
+    pub r#type: ComponentType,
+    pub label: Option<String>,
+    pub style: ButtonStyle,
+    pub custom_id: String,
+}
+
+#[derive(Serialize_repr, PartialEq, Debug)]
+#[repr(u8)]
+pub enum ComponentType {
+    ActionRow = 1,
+    Button = 2,
+}
+
+#[derive(Serialize_repr, PartialEq, Debug)]
+#[repr(u8)]
+pub enum ButtonStyle {
+    Primary = 1,
+}
+
+#[derive(Serialize_repr, PartialEq, Debug)]
+#[repr(u16)]
+pub enum MessageFlags {
+    Ephemeral = 64,
 }
