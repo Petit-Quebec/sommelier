@@ -32,9 +32,9 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
     let callback_data = match &request.data {
         Some(interaction_data) => match interaction_data.name.as_str() {
             "buttons" => buttons(&interaction_data),
-            
+
             "conway" => game_of_life(&interaction_data),
-            
+
             "deedee" => deedee(&interaction_data),
 
             _ => make_error_callback_data(),
@@ -98,27 +98,26 @@ mod tests {
     }
 
     #[test]
-    fn test_deedee() {
+    fn test_buttons() {
         let req_data = InteractionData {
-            name: "deedee".to_string(),
+            name: "buttons".to_string(),
         };
 
         let req = anonymous_request(ApplicationCommand, Some(req_data));
 
         let resp = handle_interaction(&req);
 
-        let expected_resp_data = InteractionCallbackData {
-            content: Some("mega doo doo".to_string()),
-            components: Vec::new(),
-            flags: Some(MessageFlags::Ephemeral),
-        };
+        let components = resp.data.unwrap().components;
 
-        let expected_resp = InteractionResponse {
-            r#type: ChannelMessageWithSource,
-            data: Some(expected_resp_data),
-        };
+        assert_eq!(components.len(), 1);
 
-        assert_eq!(resp, expected_resp);
+        let buttons = components[0].components.as_ref().unwrap();
+
+        assert_eq!(buttons.len(), 2);
+
+        assert_eq!(buttons[0].r#type, ComponentType::Button);
+
+        assert_eq!(buttons[1].r#type, ComponentType::Button);
     }
 
     #[test]
@@ -143,5 +142,29 @@ mod tests {
 
         println!("{}", content);
         assert_eq!(expected_emoji_count, resp_emoji_count);
+    }
+
+    #[test]
+    fn test_deedee() {
+        let req_data = InteractionData {
+            name: "deedee".to_string(),
+        };
+
+        let req = anonymous_request(ApplicationCommand, Some(req_data));
+
+        let resp = handle_interaction(&req);
+
+        let expected_resp_data = InteractionCallbackData {
+            content: Some("mega doo doo".to_string()),
+            components: Vec::new(),
+            flags: Some(MessageFlags::Ephemeral),
+        };
+
+        let expected_resp = InteractionResponse {
+            r#type: ChannelMessageWithSource,
+            data: Some(expected_resp_data),
+        };
+
+        assert_eq!(resp, expected_resp);
     }
 }

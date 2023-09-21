@@ -71,6 +71,7 @@ pub struct Component {
     pub r#type: ComponentType,
     pub components: Option<Vec<Component>>,
     pub label: Option<String>,
+    pub style: Option<ButtonStyle>,
 }
 
 #[derive(Serialize_repr, PartialEq, Debug)]
@@ -81,8 +82,13 @@ pub enum ComponentType {
 }
 
 #[derive(Serialize_repr, PartialEq, Debug)]
+#[repr(u8)]
+pub enum ButtonStyle {
+    Primary = 1,
+}
+
+#[derive(Serialize_repr, PartialEq, Debug)]
 #[repr(u16)]
 pub enum MessageFlags {
     Ephemeral = 64,
 }
-
