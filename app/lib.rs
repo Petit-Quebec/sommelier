@@ -34,7 +34,6 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
     let callback_data = match &request.data {
         Some(interaction_data) => match &interaction_data.name {
             Some(name) => match name.as_str() {
-            
                 "buttons" => buttons(&interaction_data),
 
                 "conway" => game_of_life(&interaction_data),
@@ -56,12 +55,10 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
     }
 }
 
-
 fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
-     let callback_data = match &request.data {
+    let callback_data = match &request.data {
         Some(interaction_data) => match &interaction_data.custom_id {
             Some(id) => match id.as_str() {
-            
                 "cgol" => game_of_life(&interaction_data),
 
                 "deedee" => deedee(&interaction_data),

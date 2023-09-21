@@ -3,7 +3,8 @@
  */
 
 use crate::{
-    ButtonStyle, Button, ActionRow, ComponentType, InteractionCallbackData, InteractionData, MessageFlags,
+    ActionRow, Button, ButtonStyle, ComponentType, InteractionCallbackData, InteractionData,
+    MessageFlags,
 };
 
 pub fn buttons(_: &InteractionData) -> InteractionCallbackData {
