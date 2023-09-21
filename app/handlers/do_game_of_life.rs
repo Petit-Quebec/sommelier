@@ -74,7 +74,7 @@ fn grid_to_emotes(grid: [[bool; SIZE]; SIZE]) -> String {
 pub fn game_of_life(_: &InteractionData) -> InteractionCallbackData {
     let griddy = rand_matrix();
     let next_grid = next_generation(griddy);
-    let output = grid_to_emotes(griddy) + "\n \n" + &grid_to_emotes(next_grid);
+    let output = grid_to_emotes(griddy) + "\n" + &grid_to_emotes(next_grid);
 
     InteractionCallbackData {
         content: Some(output.to_string()),
