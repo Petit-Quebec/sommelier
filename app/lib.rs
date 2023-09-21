@@ -76,7 +76,7 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
     };
 
     InteractionResponse {
-        r#type: ChannelMessageWithSource,
+        r#type: UpdateMessage,
         data: Some(callback_data),
     }
 }

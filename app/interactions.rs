@@ -60,6 +60,7 @@ pub struct InteractionResponse {
 pub enum InteractionCallbackType {
     Pong = 1,
     ChannelMessageWithSource = 4,
+    UpdateMessage = 7,
 }
 #[derive(Serialize, PartialEq, Debug)]
 pub struct InteractionCallbackData {
