@@ -22,11 +22,13 @@ pub struct InteractionRequest {
 pub enum InteractionType {
     Ping = 1,
     ApplicationCommand = 2,
+    MessageComponent = 3,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct InteractionData {
-    pub name: String,
+    pub name: Option<String>,
+    pub custom_id: Option<String>,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
@@ -63,15 +65,21 @@ pub enum InteractionCallbackType {
 pub struct InteractionCallbackData {
     pub content: Option<String>,
     pub flags: Option<MessageFlags>,
-    pub components: Vec<Component>,
+    pub components: Vec<ActionRow>,
 }
 
 #[derive(Serialize, PartialEq, Debug)]
-pub struct Component {
+pub struct ActionRow {
     pub r#type: ComponentType,
-    pub components: Option<Vec<Component>>,
+    pub components: Vec<Button>,
+}
+
+#[derive(Serialize, PartialEq, Debug)]
+pub struct Button {
+    pub r#type: ComponentType,
     pub label: Option<String>,
-    pub style: Option<ButtonStyle>,
+    pub style: ButtonStyle,
+    pub custom_id: String,
 }
 
 #[derive(Serialize_repr, PartialEq, Debug)]

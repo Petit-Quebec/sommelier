@@ -18,6 +18,8 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
         Ping => handle_ping(request),
 
         ApplicationCommand => handle_application_command(request),
+
+        MessageComponent => handle_message_component(request),
     }
 }
 
@@ -30,14 +32,44 @@ fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
 
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
     let callback_data = match &request.data {
-        Some(interaction_data) => match interaction_data.name.as_str() {
-            "buttons" => buttons(&interaction_data),
+        Some(interaction_data) => match &interaction_data.name {
+            Some(name) => match name.as_str() {
+            
+                "buttons" => buttons(&interaction_data),
 
-            "conway" => game_of_life(&interaction_data),
+                "conway" => game_of_life(&interaction_data),
 
-            "deedee" => deedee(&interaction_data),
+                "deedee" => deedee(&interaction_data),
 
-            _ => make_error_callback_data(),
+                _ => make_error_callback_data(),
+            },
+
+            None => make_error_callback_data(),
+        },
+
+        None => make_error_callback_data(),
+    };
+
+    InteractionResponse {
+        r#type: ChannelMessageWithSource,
+        data: Some(callback_data),
+    }
+}
+
+
+fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
+     let callback_data = match &request.data {
+        Some(interaction_data) => match &interaction_data.custom_id {
+            Some(id) => match id.as_str() {
+            
+                "cgol" => game_of_life(&interaction_data),
+
+                "deedee" => deedee(&interaction_data),
+
+                _ => make_error_callback_data(),
+            },
+
+            None => make_error_callback_data(),
         },
 
         None => make_error_callback_data(),
@@ -100,7 +132,8 @@ mod tests {
     #[test]
     fn test_buttons() {
         let req_data = InteractionData {
-            name: "buttons".to_string(),
+            name: Some("buttons".to_string()),
+            custom_id: None,
         };
 
         let req = anonymous_request(ApplicationCommand, Some(req_data));
@@ -111,7 +144,7 @@ mod tests {
 
         assert_eq!(components.len(), 1);
 
-        let buttons = components[0].components.as_ref().unwrap();
+        let buttons = &components[0].components;
 
         assert_eq!(buttons.len(), 2);
 
@@ -123,7 +156,8 @@ mod tests {
     #[test]
     fn test_conway() {
         let req_data = InteractionData {
-            name: "conway".to_string(),
+            name: Some("conway".to_string()),
+            custom_id: None,
         };
 
         let req = anonymous_request(ApplicationCommand, Some(req_data));
@@ -147,7 +181,8 @@ mod tests {
     #[test]
     fn test_deedee() {
         let req_data = InteractionData {
-            name: "deedee".to_string(),
+            name: Some("deedee".to_string()),
+            custom_id: None,
         };
 
         let req = anonymous_request(ApplicationCommand, Some(req_data));
