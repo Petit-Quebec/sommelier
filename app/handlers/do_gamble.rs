@@ -57,11 +57,13 @@ impl Handler for GambleHandler {
         match data.custom_id.as_ref().unwrap().as_str() {
             "roll" => InteractionResponse::new()
                 .message(&build_bank(amt))
-                .component_row(build_action_row()),
+                .component_row(build_action_row())
+                .edit(),
 
             "free" => InteractionResponse::new()
                 .message(&build_bank(amt + FREE_AMT))
-                .component_row(build_action_row()),
+                .component_row(build_action_row())
+                .edit(),
 
             "brag" => InteractionResponse::new()
                 .message(&("Winnings: ".to_string() + &amt.to_string()))
@@ -69,7 +71,8 @@ impl Handler for GambleHandler {
 
             "help" => InteractionResponse::new()
                 .message(&(build_help_message() + "\n" + &build_bank(amt)))
-                .component_row(build_action_row()),
+                .component_row(build_action_row())
+                .edit(),
 
             &_ => todo!(),
         }
