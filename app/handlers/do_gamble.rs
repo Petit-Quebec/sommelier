@@ -2,26 +2,31 @@
  * Implementation of "gamble" command.
  */
 
-use crate::{ActionRow, Button, InteractionCallbackData, MessageFlags};
+use crate::handlers::Handler;
+use crate::{ActionRow, Button, InteractionCallbackData, InteractionData, MessageFlags};
 
-pub fn gamble() -> InteractionCallbackData {
-    let roll_button = Button::new().label("roll").id("roll");
+pub struct GambleHandler;
 
-    let free_button = Button::new().label("free").id("free");
+impl Handler for GambleHandler {
+    fn handle_application_command(_: &InteractionData) -> InteractionCallbackData {
+        let roll_button = Button::new().label("roll").id("roll");
 
-    let brag_button = Button::new().label("brag").id("brag");
+        let free_button = Button::new().label("free").id("free");
 
-    let help_button = Button::new().label("help").id("help");
+        let brag_button = Button::new().label("brag").id("brag");
 
-    let action_row = ActionRow::new()
-        .button(roll_button)
-        .button(free_button)
-        .button(brag_button)
-        .button(help_button);
+        let help_button = Button::new().label("help").id("help");
 
-    InteractionCallbackData {
-        content: Some("gambling stub".to_string()),
-        components: vec![action_row],
-        flags: Some(MessageFlags::Ephemeral),
+        let action_row = ActionRow::new()
+            .button(roll_button)
+            .button(free_button)
+            .button(brag_button)
+            .button(help_button);
+
+        InteractionCallbackData {
+            content: Some("gambling stub".to_string()),
+            components: vec![action_row],
+            flags: Some(MessageFlags::Ephemeral),
+        }
     }
 }

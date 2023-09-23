@@ -1,3 +1,4 @@
+use crate::handlers::Handler;
 use crate::{InteractionCallbackData, InteractionData, MessageFlags};
 use rand;
 
@@ -71,14 +72,18 @@ fn grid_to_emotes(grid: [[bool; SIZE]; SIZE]) -> String {
     })
 }
 
-pub fn game_of_life(_: &InteractionData) -> InteractionCallbackData {
-    let griddy = rand_matrix();
-    let next_grid = next_generation(griddy);
-    let output = grid_to_emotes(griddy) + "\n" + &grid_to_emotes(next_grid);
+pub struct GameOfLifeHandler;
 
-    InteractionCallbackData {
-        content: Some(output.to_string()),
-        components: Vec::new(),
-        flags: Some(MessageFlags::Ephemeral),
+impl Handler for GameOfLifeHandler {
+    fn handle_application_command(_: &InteractionData) -> InteractionCallbackData {
+        let griddy = rand_matrix();
+        let next_grid = next_generation(griddy);
+        let output = grid_to_emotes(griddy) + "\n" + &grid_to_emotes(next_grid);
+
+        InteractionCallbackData {
+            content: Some(output.to_string()),
+            components: Vec::new(),
+            flags: Some(MessageFlags::Ephemeral),
+        }
     }
 }

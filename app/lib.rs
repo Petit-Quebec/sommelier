@@ -9,7 +9,7 @@ pub mod interactions;
 use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use handlers::{gamble, game_of_life, DeedeeHandler, Handler};
+use handlers::{DeedeeHandler, GambleHandler, GameOfLifeHandler, Handler};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -32,11 +32,11 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
     let callback_data = match &request.data {
         Some(interaction_data) => match &interaction_data.name {
             Some(name) => match name.as_str() {
-                "conway" => game_of_life(&interaction_data),
+                "conway" => GameOfLifeHandler::handle_application_command(&interaction_data),
 
                 "deedee" => DeedeeHandler::handle_application_command(&interaction_data),
 
-                "gamble" => gamble(),
+                "gamble" => GambleHandler::handle_application_command(&interaction_data),
 
                 _ => make_error_callback_data(),
             },
@@ -57,8 +57,6 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
     let callback_data = match &request.data {
         Some(interaction_data) => match &interaction_data.custom_id {
             Some(id) => match id.as_str() {
-                "cgol" => game_of_life(&interaction_data),
-
                 "deedee" => DeedeeHandler::handle_message_component(&interaction_data),
 
                 _ => make_error_callback_data(),
