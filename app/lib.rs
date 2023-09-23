@@ -6,12 +6,9 @@
 mod handlers;
 pub mod interactions;
 
-use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use handlers::deedee;
-use handlers::game_of_life;
-use handlers::{buttons, buttons_minus_one, buttons_plus_one};
+use handlers::{DeedeeHandler, ErrorHandler, GambleHandler, GameOfLifeHandler, Handler};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -24,84 +21,55 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
 }
 
 fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
-    InteractionResponse {
-        r#type: Pong,
-        data: None,
+    InteractionResponse::pong()
+}
+
+fn select_handler(name: &str) -> Box<dyn Handler> {
+    match name {
+        "conway" => Box::new(GameOfLifeHandler),
+
+        "deedee" => Box::new(DeedeeHandler),
+
+        "gamble" => Box::new(GambleHandler),
+
+        _ => Box::new(ErrorHandler),
     }
 }
 
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
-    let callback_data = match &request.data {
+    match &request.data {
         Some(interaction_data) => match &interaction_data.name {
-            Some(name) => match name.as_str() {
-                "buttons" => buttons(&interaction_data),
+            Some(name) => select_handler(name).handle_application_command(request),
 
-                "conway" => game_of_life(&interaction_data),
-
-                "deedee" => deedee(&interaction_data),
-
-                _ => make_error_callback_data(),
-            },
-
-            None => make_error_callback_data(),
+            None => make_error_response(),
         },
 
-        None => make_error_callback_data(),
-    };
-
-    InteractionResponse {
-        r#type: ChannelMessageWithSource,
-        data: Some(callback_data),
+        None => make_error_response(),
     }
 }
 
 fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
-    let callback_data = match &request.data {
-        Some(interaction_data) => match &interaction_data.custom_id {
-            Some(id) => match id.as_str() {
-                "buttons_+1" => {
-                    let old = &request.message.as_ref().unwrap().content;
+    let name = &request
+        .message
+        .as_ref()
+        .unwrap()
+        .interaction
+        .as_ref()
+        .unwrap()
+        .name;
 
-                    buttons_plus_one(old)
-                }
-
-                "buttons_-1" => {
-                    let old = &request.message.as_ref().unwrap().content;
-
-                    buttons_minus_one(old)
-                }
-
-                "cgol" => game_of_life(&interaction_data),
-
-                "deedee" => deedee(&interaction_data),
-
-                _ => make_error_callback_data(),
-            },
-
-            None => make_error_callback_data(),
-        },
-
-        None => make_error_callback_data(),
-    };
-
-    InteractionResponse {
-        r#type: UpdateMessage,
-        data: Some(callback_data),
-    }
+    select_handler(name).handle_message_component(request)
 }
 
-fn make_error_callback_data() -> InteractionCallbackData {
-    InteractionCallbackData {
-        content: Some("Could not recognize command.".to_string()),
-        components: Vec::new(),
-        flags: Some(MessageFlags::Ephemeral),
-    }
+fn make_error_response() -> InteractionResponse {
+    InteractionResponse::new().message("Something erroneous happened...")
 }
 
 #[cfg(test)]
 mod tests {
 
     use super::*;
+    use crate::InteractionCallbackType::*;
     use handlers::SIZE;
 
     fn anonymous_request(
@@ -123,6 +91,7 @@ mod tests {
             }),
             message: Some(Message {
                 content: "DEBUG_MESSAGE_CONTENT".to_string(),
+                interaction: None,
             }),
         }
     }
@@ -131,39 +100,9 @@ mod tests {
     fn test_ping_pong() {
         let req = anonymous_request(Ping, None);
 
-        let expected_resp = InteractionResponse {
-            r#type: Pong,
-            data: None,
-        };
-
         let resp = handle_interaction(&req);
 
-        assert_eq!(resp, expected_resp);
-    }
-
-    #[test]
-    fn test_buttons() {
-        let req_data = InteractionData {
-            name: Some("buttons".to_string()),
-            custom_id: None,
-        };
-
-        let req = anonymous_request(ApplicationCommand, Some(req_data));
-
-        let resp = handle_interaction(&req);
-
-        let components = resp.data.unwrap().components;
-
-        assert_eq!(components.len(), 1);
-
-        let buttons = &components[0].components;
-
-        assert_eq!(buttons.len(), 4);
-
-        assert_eq!(buttons[0].r#type, ComponentType::Button);
-        assert_eq!(buttons[1].r#type, ComponentType::Button);
-        assert_eq!(buttons[2].r#type, ComponentType::Button);
-        assert_eq!(buttons[3].r#type, ComponentType::Button);
+        assert_eq!(resp.r#type, InteractionCallbackType::Pong);
     }
 
     #[test]
@@ -177,11 +116,7 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        let content = resp
-            .data
-            .expect("no data in response!")
-            .content
-            .expect("no content in data!");
+        let content = resp.data.content.expect("no content in data!");
 
         let resp_emoji_count = content.matches("🌝").count() + content.matches("🌚").count();
 
@@ -210,9 +145,34 @@ mod tests {
 
         let expected_resp = InteractionResponse {
             r#type: ChannelMessageWithSource,
-            data: Some(expected_resp_data),
+            data: expected_resp_data,
         };
 
         assert_eq!(resp, expected_resp);
+    }
+
+    #[test]
+    fn test_gamble() {
+        let req_data = InteractionData {
+            name: Some("gamble".to_string()),
+            custom_id: None,
+        };
+
+        let req = anonymous_request(ApplicationCommand, Some(req_data));
+
+        let resp = handle_interaction(&req);
+
+        let components = resp.data.components;
+
+        assert_eq!(components.len(), 1);
+
+        let buttons = &components[0].components;
+
+        assert_eq!(buttons.len(), 4);
+
+        assert_eq!(buttons[0].r#type, ComponentType::Button);
+        assert_eq!(buttons[1].r#type, ComponentType::Button);
+        assert_eq!(buttons[2].r#type, ComponentType::Button);
+        assert_eq!(buttons[3].r#type, ComponentType::Button);
     }
 }

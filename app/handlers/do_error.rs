@@ -1,14 +1,14 @@
 /*!
- * Implementation of "deedee" command.
+ * Implementation for returning an error.
  */
 
 use crate::handlers::Handler;
 use crate::{InteractionRequest, InteractionResponse};
 
-pub struct DeedeeHandler;
+pub struct ErrorHandler;
 
-impl Handler for DeedeeHandler {
+impl Handler for ErrorHandler {
     fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
-        InteractionResponse::new().message("mega doo doo")
+        InteractionResponse::new().message("Unknown command...")
     }
 }
