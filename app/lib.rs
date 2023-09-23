@@ -6,7 +6,6 @@
 mod handlers;
 pub mod interactions;
 
-use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
 use handlers::{DeedeeHandler, ErrorHandler, GambleHandler, GameOfLifeHandler, Handler};
@@ -22,10 +21,7 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
 }
 
 fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
-    InteractionResponse {
-        r#type: Pong,
-        data: None,
-    }
+    InteractionResponse::pong()
 }
 
 fn select_handler(name: &str) -> Box<dyn Handler> {
@@ -41,24 +37,19 @@ fn select_handler(name: &str) -> Box<dyn Handler> {
 }
 
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
-    let callback_data = match &request.data {
+    match &request.data {
         Some(interaction_data) => match &interaction_data.name {
             Some(name) => select_handler(name).handle_application_command(&interaction_data),
 
-            None => make_error_callback_data(),
+            None => make_error_response(),
         },
 
-        None => make_error_callback_data(),
-    };
-
-    InteractionResponse {
-        r#type: ChannelMessageWithSource,
-        data: Some(callback_data),
+        None => make_error_response(),
     }
 }
 
 fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
-    let callback_data = match &request.data {
+    match &request.data {
         Some(interaction_data) => {
             let name = &request
                 .message
@@ -72,27 +63,19 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
             select_handler(name).handle_message_component(&interaction_data)
         }
 
-        None => make_error_callback_data(),
-    };
-
-    InteractionResponse {
-        r#type: UpdateMessage,
-        data: Some(callback_data),
+        None => make_error_response(),
     }
 }
 
-fn make_error_callback_data() -> InteractionCallbackData {
-    InteractionCallbackData {
-        content: Some("Could not recognize command.".to_string()),
-        components: Vec::new(),
-        flags: Some(MessageFlags::Ephemeral),
-    }
+fn make_error_response() -> InteractionResponse {
+    InteractionResponse::new().message("Something erroneous happened...")
 }
 
 #[cfg(test)]
 mod tests {
 
     use super::*;
+    use crate::InteractionCallbackType::*;
     use handlers::SIZE;
 
     fn anonymous_request(
@@ -123,14 +106,9 @@ mod tests {
     fn test_ping_pong() {
         let req = anonymous_request(Ping, None);
 
-        let expected_resp = InteractionResponse {
-            r#type: Pong,
-            data: None,
-        };
-
         let resp = handle_interaction(&req);
 
-        assert_eq!(resp, expected_resp);
+        assert_eq!(resp.r#type, InteractionCallbackType::Pong);
     }
 
     #[test]
@@ -144,11 +122,7 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        let content = resp
-            .data
-            .expect("no data in response!")
-            .content
-            .expect("no content in data!");
+        let content = resp.data.content.expect("no content in data!");
 
         let resp_emoji_count = content.matches("🌝").count() + content.matches("🌚").count();
 
@@ -177,7 +151,7 @@ mod tests {
 
         let expected_resp = InteractionResponse {
             r#type: ChannelMessageWithSource,
-            data: Some(expected_resp_data),
+            data: expected_resp_data,
         };
 
         assert_eq!(resp, expected_resp);

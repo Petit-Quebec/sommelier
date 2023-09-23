@@ -3,7 +3,7 @@
  */
 
 use crate::handlers::Handler;
-use crate::{ActionRow, Button, InteractionCallbackData, InteractionData, MessageFlags};
+use crate::{ActionRow, Button, InteractionData, InteractionResponse};
 
 const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
@@ -44,42 +44,32 @@ fn build_bank(n: u64) -> String {
 pub struct GambleHandler;
 
 impl Handler for GambleHandler {
-    fn handle_application_command(&self, _: &InteractionData) -> InteractionCallbackData {
-        InteractionCallbackData {
-            content: Some(build_bank(STARTING_AMT)),
-            components: vec![build_action_row()],
-            flags: Some(MessageFlags::Ephemeral),
-        }
+    fn handle_application_command(&self, _: &InteractionData) -> InteractionResponse {
+        InteractionResponse::new()
+            .message(&build_bank(STARTING_AMT))
+            .component_row(build_action_row())
     }
 
-    fn handle_message_component(&self, data: &InteractionData) -> InteractionCallbackData {
+    fn handle_message_component(&self, data: &InteractionData) -> InteractionResponse {
         // UNFINISHED BUSINESS HERE
         let amt = 1337;
 
         match data.custom_id.as_ref().unwrap().as_str() {
-            "roll" => InteractionCallbackData {
-                content: Some(build_bank(amt)),
-                components: vec![build_action_row()],
-                flags: Some(MessageFlags::Ephemeral),
-            },
+            "roll" => InteractionResponse::new()
+                .message(&build_bank(amt))
+                .component_row(build_action_row()),
 
-            "free" => InteractionCallbackData {
-                content: Some(build_bank(amt + FREE_AMT)),
-                components: vec![build_action_row()],
-                flags: Some(MessageFlags::Ephemeral),
-            },
+            "free" => InteractionResponse::new()
+                .message(&build_bank(amt + FREE_AMT))
+                .component_row(build_action_row()),
 
-            "brag" => InteractionCallbackData {
-                content: Some("Winnings: ".to_string() + &amt.to_string()),
-                components: vec![],
-                flags: None,
-            },
+            "brag" => InteractionResponse::new()
+                .message(&("Winnings: ".to_string() + &amt.to_string()))
+                .shout(),
 
-            "help" => InteractionCallbackData {
-                content: Some(build_help_message() + "\n" + &build_bank(amt)),
-                components: vec![build_action_row()],
-                flags: Some(MessageFlags::Ephemeral),
-            },
+            "help" => InteractionResponse::new()
+                .message(&(build_help_message() + "\n" + &build_bank(amt)))
+                .component_row(build_action_row()),
 
             &_ => todo!(),
         }

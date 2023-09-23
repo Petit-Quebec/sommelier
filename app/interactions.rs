@@ -64,7 +64,55 @@ pub struct InteractionMetadata<'a> {
 #[derive(Serialize, PartialEq, Debug)]
 pub struct InteractionResponse {
     pub r#type: InteractionCallbackType,
-    pub data: Option<InteractionCallbackData>,
+    pub data: InteractionCallbackData,
+}
+
+impl InteractionResponse {
+    pub fn new() -> Self {
+        let data = InteractionCallbackData {
+            content: None,
+            flags: Some(MessageFlags::Ephemeral),
+            components: Vec::new(),
+        };
+
+        InteractionResponse {
+            r#type: InteractionCallbackType::ChannelMessageWithSource,
+            data: data,
+        }
+    }
+
+    pub fn pong() -> Self {
+        let data = InteractionCallbackData {
+            content: None,
+            flags: Some(MessageFlags::Ephemeral),
+            components: Vec::new(),
+        };
+
+        InteractionResponse {
+            r#type: InteractionCallbackType::Pong,
+            data: data,
+        }
+    }
+
+    pub fn edit(mut self) -> Self {
+        self.r#type = InteractionCallbackType::UpdateMessage;
+        self
+    }
+
+    pub fn message(mut self, msg: &str) -> Self {
+        self.data.content = Some(msg.to_string());
+        self
+    }
+
+    pub fn component_row(mut self, row: ActionRow) -> Self {
+        self.data.components.push(row);
+        self
+    }
+
+    pub fn shout(mut self) -> Self {
+        self.data.flags = None;
+        self
+    }
 }
 
 #[derive(Serialize_repr, PartialEq, Debug)]
@@ -80,16 +128,6 @@ pub struct InteractionCallbackData {
     pub content: Option<String>,
     pub flags: Option<MessageFlags>,
     pub components: Vec<ActionRow>,
-}
-
-impl InteractionCallbackData {
-    pub fn new() -> Self {
-        InteractionCallbackData {
-            content: None,
-            flags: None,
-            components: Vec::new(),
-        }
-    }
 }
 
 #[derive(Serialize, PartialEq, Debug)]

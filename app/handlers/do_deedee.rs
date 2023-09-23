@@ -3,16 +3,12 @@
  */
 
 use crate::handlers::Handler;
-use crate::{InteractionCallbackData, InteractionData, MessageFlags};
+use crate::{InteractionData, InteractionResponse};
 
 pub struct DeedeeHandler;
 
 impl Handler for DeedeeHandler {
-    fn handle_application_command(&self, _: &InteractionData) -> InteractionCallbackData {
-        InteractionCallbackData {
-            content: Some("mega doo doo".to_string()),
-            components: Vec::new(),
-            flags: Some(MessageFlags::Ephemeral),
-        }
+    fn handle_application_command(&self, _: &InteractionData) -> InteractionResponse {
+        InteractionResponse::new().message("mega doo doo")
     }
 }
