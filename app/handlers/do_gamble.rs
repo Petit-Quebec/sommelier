@@ -4,9 +4,12 @@
 
 use crate::handlers::Handler;
 use crate::{ActionRow, Button, InteractionRequest, InteractionResponse};
+use regex::Regex;
 
 const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
+const BANK_PREFIX: &str = "You have: ";
+const BANK_SUFFIX: &str = " :tickets:s";
 
 fn build_action_row() -> ActionRow {
     let roll_button = Button::new().label("roll").id("roll");
@@ -27,7 +30,7 @@ fn build_action_row() -> ActionRow {
 fn build_help_message() -> String {
     "## Instructions
 
-Roll to get 0x, 1x, 2x, or 3x odds on your betted :grapes:s. Use the \"brag\" button to tell others how many grapes you have! 
+Roll to get 0x, 1x, 2x, or 3x odds on your betted :tickets:s. Use the \"brag\" button to tell others how many :tickets:s you have! 
 
 ### Odds:
 - 25% 0x
@@ -38,7 +41,16 @@ Roll to get 0x, 1x, 2x, or 3x odds on your betted :grapes:s. Use the \"brag\" bu
 }
 
 fn build_bank(n: u64) -> String {
-    "You have: ".to_string() + &n.to_string()
+    BANK_PREFIX.to_string() + &n.to_string() + BANK_SUFFIX
+}
+
+fn recognize_bank(hay: &str) -> u64 {
+    let pattern = BANK_PREFIX.to_string() + "[0-9]*" + BANK_SUFFIX;
+    let re = Regex::new(&pattern).unwrap();
+    let mut range = re.find(hay).unwrap().range();
+    range.start += BANK_PREFIX.len();
+    range.end -= BANK_SUFFIX.len();
+    hay[range].parse::<u64>().unwrap_or(STARTING_AMT)
 }
 
 fn get_user_name(req: &InteractionRequest) -> String {
@@ -61,8 +73,7 @@ impl Handler for GambleHandler {
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
-        // UNFINISHED BUSINESS HERE
-        let amt = 1337;
+        let amt = recognize_bank(&req.message.as_ref().unwrap().content);
 
         match req
             .data
@@ -86,7 +97,7 @@ impl Handler for GambleHandler {
             "brag" => {
                 let name = get_user_name(req);
 
-                let msg = format!("<@{}> has {} grapes!", name, amt);
+                let msg = format!("<@{}> has {} :tickets:s!", name, amt);
 
                 InteractionResponse::new().message(&msg).shout()
             }

@@ -175,4 +175,32 @@ mod tests {
         assert_eq!(buttons[2].r#type, ComponentType::Button);
         assert_eq!(buttons[3].r#type, ComponentType::Button);
     }
+
+    #[test]
+    fn test_gamble_free() {
+        let req_data = InteractionData {
+            name: None,
+            custom_id: Some("free".to_string()),
+        };
+
+        let mut req = anonymous_request(MessageComponent, Some(req_data));
+
+        let interaction = MessageInteraction {
+            name: "gamble".to_string(),
+        };
+
+        let message = Message {
+            content: "You have: 3043 :tickets:s".to_string(),
+            interaction: Some(interaction),
+        };
+
+        req.message = Some(message);
+
+        let resp = handle_interaction(&req);
+
+        assert_eq!(
+            resp.data.content.unwrap(),
+            "You have: 3048 :tickets:s".to_string()
+        );
+    }
 }
