@@ -125,7 +125,7 @@ mod tests {
         }
         "#;
 
-        let expected_pong_json = r#"{"data":null,"type":1}"#;
+        let expected_pong_json = r#"{"data":{"components":[],"content":null,"flags":64},"type":1}"#;
 
         let pong_json = handle_interaction_json(ping_json);
 
