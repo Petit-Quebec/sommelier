@@ -3,7 +3,7 @@
  */
 
 use crate::handlers::Handler;
-use crate::{ActionRow, Button, InteractionData, InteractionResponse};
+use crate::{ActionRow, Button, InteractionRequest, InteractionResponse};
 
 const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
@@ -44,17 +44,25 @@ fn build_bank(n: u64) -> String {
 pub struct GambleHandler;
 
 impl Handler for GambleHandler {
-    fn handle_application_command(&self, _: &InteractionData) -> InteractionResponse {
+    fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
         InteractionResponse::new()
             .message(&build_bank(STARTING_AMT))
             .component_row(build_action_row())
     }
 
-    fn handle_message_component(&self, data: &InteractionData) -> InteractionResponse {
+    fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
         // UNFINISHED BUSINESS HERE
         let amt = 1337;
 
-        match data.custom_id.as_ref().unwrap().as_str() {
+        match req
+            .data
+            .as_ref()
+            .unwrap()
+            .custom_id
+            .as_ref()
+            .unwrap()
+            .as_str()
+        {
             "roll" => InteractionResponse::new()
                 .message(&build_bank(amt))
                 .component_row(build_action_row())

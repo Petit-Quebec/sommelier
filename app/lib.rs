@@ -39,7 +39,7 @@ fn select_handler(name: &str) -> Box<dyn Handler> {
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
     match &request.data {
         Some(interaction_data) => match &interaction_data.name {
-            Some(name) => select_handler(name).handle_application_command(&interaction_data),
+            Some(name) => select_handler(name).handle_application_command(request),
 
             None => make_error_response(),
         },
@@ -49,22 +49,16 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
 }
 
 fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
-    match &request.data {
-        Some(interaction_data) => {
-            let name = &request
-                .message
-                .as_ref()
-                .unwrap()
-                .interaction
-                .as_ref()
-                .unwrap()
-                .name;
+    let name = &request
+        .message
+        .as_ref()
+        .unwrap()
+        .interaction
+        .as_ref()
+        .unwrap()
+        .name;
 
-            select_handler(name).handle_message_component(&interaction_data)
-        }
-
-        None => make_error_response(),
-    }
+    select_handler(name).handle_message_component(request)
 }
 
 fn make_error_response() -> InteractionResponse {
