@@ -9,7 +9,9 @@ pub mod interactions;
 use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use handlers::{buttons, buttons_minus_one, buttons_plus_one, deedee, gamble, game_of_life};
+use handlers::{
+    buttons, buttons_minus_one, buttons_plus_one, gamble, game_of_life, DeedeeHandler, Handler,
+};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -36,7 +38,7 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
 
                 "conway" => game_of_life(&interaction_data),
 
-                "deedee" => deedee(&interaction_data),
+                "deedee" => DeedeeHandler::handle_application_command(&interaction_data),
 
                 "gamble" => gamble(),
 
@@ -73,7 +75,7 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
 
                 "cgol" => game_of_life(&interaction_data),
 
-                "deedee" => deedee(&interaction_data),
+                "deedee" => DeedeeHandler::handle_message_component(&interaction_data),
 
                 _ => make_error_callback_data(),
             },
@@ -123,6 +125,7 @@ mod tests {
             }),
             message: Some(Message {
                 content: "DEBUG_MESSAGE_CONTENT".to_string(),
+                interaction: None,
             }),
         }
     }

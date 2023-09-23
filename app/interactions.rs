@@ -41,6 +41,12 @@ pub struct GuildMember {
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct Message {
     pub content: String,
+    pub interaction: Option<MessageInteraction>,
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct MessageInteraction {
+    pub name: String,
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
@@ -74,6 +80,16 @@ pub struct InteractionCallbackData {
     pub content: Option<String>,
     pub flags: Option<MessageFlags>,
     pub components: Vec<ActionRow>,
+}
+
+impl InteractionCallbackData {
+    pub fn new() -> Self {
+        InteractionCallbackData {
+            content: None,
+            flags: None,
+            components: Vec::new(),
+        }
+    }
 }
 
 #[derive(Serialize, PartialEq, Debug)]
