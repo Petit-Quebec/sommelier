@@ -59,15 +59,18 @@ fn handle_application_command(request: &InteractionRequest) -> InteractionRespon
 
 fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
     let callback_data = match &request.data {
-        Some(interaction_data) => match &interaction_data.custom_id {
-            Some(id) => match id.as_str() {
-                "deedee" => DeedeeHandler.handle_message_component(&interaction_data),
+        Some(interaction_data) => {
+            let name = &request
+                .message
+                .as_ref()
+                .unwrap()
+                .interaction
+                .as_ref()
+                .unwrap()
+                .name;
 
-                _ => make_error_callback_data(),
-            },
-
-            None => make_error_callback_data(),
-        },
+            select_handler(name).handle_message_component(&interaction_data)
+        }
 
         None => make_error_callback_data(),
     };

@@ -29,4 +29,12 @@ impl Handler for GambleHandler {
             flags: Some(MessageFlags::Ephemeral),
         }
     }
+
+    fn handle_message_component(&self, _: &InteractionData) -> InteractionCallbackData {
+        InteractionCallbackData {
+            content: Some("button reaction stub".to_string()),
+            components: vec![],
+            flags: Some(MessageFlags::Ephemeral),
+        }
+    }
 }
