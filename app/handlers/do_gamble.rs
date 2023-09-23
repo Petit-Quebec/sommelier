@@ -8,7 +8,7 @@ use crate::{ActionRow, Button, InteractionCallbackData, InteractionData, Message
 pub struct GambleHandler;
 
 impl Handler for GambleHandler {
-    fn handle_application_command(_: &InteractionData) -> InteractionCallbackData {
+    fn handle_application_command(&self, _: &InteractionData) -> InteractionCallbackData {
         let roll_button = Button::new().label("roll").id("roll");
 
         let free_button = Button::new().label("free").id("free");

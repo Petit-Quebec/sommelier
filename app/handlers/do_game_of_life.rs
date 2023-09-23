@@ -75,7 +75,7 @@ fn grid_to_emotes(grid: [[bool; SIZE]; SIZE]) -> String {
 pub struct GameOfLifeHandler;
 
 impl Handler for GameOfLifeHandler {
-    fn handle_application_command(_: &InteractionData) -> InteractionCallbackData {
+    fn handle_application_command(&self, _: &InteractionData) -> InteractionCallbackData {
         let griddy = rand_matrix();
         let next_grid = next_generation(griddy);
         let output = grid_to_emotes(griddy) + "\n" + &grid_to_emotes(next_grid);

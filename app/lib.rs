@@ -9,7 +9,7 @@ pub mod interactions;
 use crate::interactions::InteractionCallbackType::*;
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use handlers::{DeedeeHandler, GambleHandler, GameOfLifeHandler, Handler};
+use handlers::{DeedeeHandler, ErrorHandler, GambleHandler, GameOfLifeHandler, Handler};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -28,18 +28,22 @@ fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
     }
 }
 
+fn select_handler(name: &str) -> Box<dyn Handler> {
+    match name {
+        "conway" => Box::new(GameOfLifeHandler),
+
+        "deedee" => Box::new(DeedeeHandler),
+
+        "gamble" => Box::new(GambleHandler),
+
+        _ => Box::new(ErrorHandler),
+    }
+}
+
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
     let callback_data = match &request.data {
         Some(interaction_data) => match &interaction_data.name {
-            Some(name) => match name.as_str() {
-                "conway" => GameOfLifeHandler::handle_application_command(&interaction_data),
-
-                "deedee" => DeedeeHandler::handle_application_command(&interaction_data),
-
-                "gamble" => GambleHandler::handle_application_command(&interaction_data),
-
-                _ => make_error_callback_data(),
-            },
+            Some(name) => select_handler(name).handle_application_command(&interaction_data),
 
             None => make_error_callback_data(),
         },
@@ -57,7 +61,7 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
     let callback_data = match &request.data {
         Some(interaction_data) => match &interaction_data.custom_id {
             Some(id) => match id.as_str() {
-                "deedee" => DeedeeHandler::handle_message_component(&interaction_data),
+                "deedee" => DeedeeHandler.handle_message_component(&interaction_data),
 
                 _ => make_error_callback_data(),
             },
