@@ -27,7 +27,7 @@ fn build_action_row() -> ActionRow {
 fn build_help_message() -> String {
     "## Instructions
 
-Roll to get 0x, 1x, 2x, or 3x odds on your betted points. If you want to end your run, use the \"brag\" button to let others know about your score! 
+Roll to get 0x, 1x, 2x, or 3x odds on your betted :grapes:s. Use the \"brag\" button to tell others how many grapes you have! 
 
 ### Odds:
 - 25% 0x
@@ -39,6 +39,16 @@ Roll to get 0x, 1x, 2x, or 3x odds on your betted points. If you want to end you
 
 fn build_bank(n: u64) -> String {
     "You have: ".to_string() + &n.to_string()
+}
+
+fn get_user_name(req: &InteractionRequest) -> String {
+    match &req.member {
+        Some(member) => match &member.user {
+            Some(user) => user.id.clone(),
+            None => "Someone".to_string(),
+        },
+        None => "Someone".to_string(),
+    }
 }
 
 pub struct GambleHandler;
@@ -73,9 +83,13 @@ impl Handler for GambleHandler {
                 .component_row(build_action_row())
                 .edit(),
 
-            "brag" => InteractionResponse::new()
-                .message(&("Winnings: ".to_string() + &amt.to_string()))
-                .shout(),
+            "brag" => {
+                let name = get_user_name(req);
+
+                let msg = format!("<@{}> has {} grapes!", name, amt);
+
+                InteractionResponse::new().message(&msg).shout()
+            }
 
             "help" => InteractionResponse::new()
                 .message(&(build_help_message() + "\n" + &build_bank(amt)))
