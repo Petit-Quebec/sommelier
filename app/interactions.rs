@@ -68,6 +68,7 @@ pub enum InteractionCallbackType {
     ChannelMessageWithSource = 4,
     UpdateMessage = 7,
 }
+
 #[derive(Serialize, PartialEq, Debug)]
 pub struct InteractionCallbackData {
     pub content: Option<String>,
@@ -81,12 +82,47 @@ pub struct ActionRow {
     pub components: Vec<Button>,
 }
 
+impl ActionRow {
+    pub fn new() -> Self {
+        ActionRow {
+            r#type: ComponentType::ActionRow,
+            components: Vec::new(),
+        }
+    }
+
+    pub fn button(mut self, button: Button) -> Self {
+        self.components.push(button);
+        self
+    }
+}
+
 #[derive(Serialize, PartialEq, Debug)]
 pub struct Button {
     pub r#type: ComponentType,
     pub label: Option<String>,
     pub style: ButtonStyle,
     pub custom_id: String,
+}
+
+impl Button {
+    pub fn new() -> Self {
+        Button {
+            r#type: ComponentType::Button,
+            label: None,
+            style: ButtonStyle::Primary,
+            custom_id: "unlabeled button".to_string(),
+        }
+    }
+
+    pub fn label(mut self, label: &str) -> Self {
+        self.label = Some(label.to_string());
+        self
+    }
+
+    pub fn id(mut self, id: &str) -> Self {
+        self.custom_id = id.to_string();
+        self
+    }
 }
 
 #[derive(Serialize_repr, PartialEq, Debug)]
