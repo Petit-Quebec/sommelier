@@ -71,6 +71,14 @@ fn build_roll_result(bet: u64, bank: u64) -> String {
     }
 }
 
+fn build_free_result(bank: u64) -> String {
+    format!(
+        "# :magic_wand:
+You got {} free :sparkles:s. Come again anytime!\n",
+        FREE_AMT
+    ) + &build_stats(bank + FREE_AMT)
+}
+
 fn translate_proof(hash: &[u8]) -> String {
     let mut proof = "".to_string();
 
@@ -157,7 +165,7 @@ impl Handler for GambleHandler {
                 .edit(),
 
             "free" => InteractionResponse::new()
-                .message(&build_stats(bank + FREE_AMT))
+                .message(&build_free_result(bank))
                 .component_row(build_action_row())
                 .edit(),
 
