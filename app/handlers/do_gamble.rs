@@ -83,9 +83,9 @@ fn translate_proof(hash: &[u8]) -> String {
 
         proof += &match suffix {
             0 => "oo",
-            1 => "a",
+            1 => "eee",
             2 => "ee",
-            _ => "e",
+            _ => "ooo",
         }
         .to_string();
 
