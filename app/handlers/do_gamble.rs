@@ -4,9 +4,12 @@
 
 use crate::handlers::Handler;
 use crate::{ActionRow, Button, InteractionRequest, InteractionResponse};
+use hex::FromHex;
 use rand::{thread_rng, Rng};
 use regex::Regex;
+use sha256::digest;
 
+const SALT: &str = env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
@@ -53,6 +56,14 @@ fn build_roll_result(bet: u64, bank: u64) -> String {
             + &format!("You **won** {} :tickets:s!\n", winnings)
             + &build_bank(new_bank)
     }
+}
+
+fn build_brag_result(id: &str, bank: u64) -> String {
+    let s = SALT.to_string() + id + &bank.to_string();
+
+    let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
+
+    format!("<@{}> has {} :tickets:s!\n", id, bank) + &format!("Proof: {}", hash[0].to_string())
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
@@ -107,7 +118,7 @@ impl Handler for GambleHandler {
 
             "brag" => {
                 let name = get_user_name(req);
-                let msg = format!("<@{}> has {} :tickets:s!", name, bank);
+                let msg = build_brag_result(&name, bank);
                 InteractionResponse::new().message(&msg).shout()
             }
 
