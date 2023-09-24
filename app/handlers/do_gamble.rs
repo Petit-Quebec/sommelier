@@ -13,25 +13,20 @@ const BANK_SUFFIX: &str = " :tickets:s";
 
 fn build_action_row() -> ActionRow {
     let roll_button = Button::new().label("roll").id("roll");
-
     let free_button = Button::new().label("free").id("free");
-
     let brag_button = Button::new().label("brag").id("brag");
-
-    let help_button = Button::new().label("help").id("help");
+    let rules_button = Button::new().label("help").id("help");
 
     ActionRow::new()
         .button(roll_button)
         .button(free_button)
         .button(brag_button)
-        .button(help_button)
+        .button(rules_button)
 }
 
-fn build_help_message() -> String {
+fn build_rules_message() -> String {
     "## Instructions
-
-Roll to get 0x, 1x, 2x, or 3x odds on your betted :tickets:s. Use the \"brag\" button to tell others how many :tickets:s you have! 
-
+Roll to get 0x, 1x, 2x, or 3x odds on your betted :tickets:s. Use the **brag** button to tell others how many :tickets:s you have! 
 ### Odds:
 - 25% 0x
 - 25% 1x
@@ -42,6 +37,20 @@ Roll to get 0x, 1x, 2x, or 3x odds on your betted :tickets:s. Use the \"brag\" b
 
 fn build_bank(n: u64) -> String {
     BANK_PREFIX.to_string() + &n.to_string() + BANK_SUFFIX
+}
+
+fn build_roll_result(bet: u64, bank: u64) -> String {
+    if bet > bank {
+        "You can't roll on more :tickets:s than you have!\n".to_string() + &build_bank(bank)
+    } else {
+        let roll = 3;
+        let winnings = roll * bet;
+        let new_bank = bank - bet + winnings;
+        format!("You rolled on {} :tickets:s...\n", bet)
+            + &format!("for a **{}**x multiplier!\n", roll)
+            + &format!("You **won** {} :tickets:s!\n", winnings)
+            + &build_bank(new_bank)
+    }
 }
 
 fn recognize_bank(hay: &str) -> u64 {
@@ -73,7 +82,7 @@ impl Handler for GambleHandler {
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
-        let amt = recognize_bank(&req.message.as_ref().unwrap().content);
+        let bank = recognize_bank(&req.message.as_ref().unwrap().content);
 
         match req
             .data
@@ -85,25 +94,23 @@ impl Handler for GambleHandler {
             .as_str()
         {
             "roll" => InteractionResponse::new()
-                .message(&build_bank(amt))
+                .message(&build_roll_result(bank, bank))
                 .component_row(build_action_row())
                 .edit(),
 
             "free" => InteractionResponse::new()
-                .message(&build_bank(amt + FREE_AMT))
+                .message(&build_bank(bank + FREE_AMT))
                 .component_row(build_action_row())
                 .edit(),
 
             "brag" => {
                 let name = get_user_name(req);
-
-                let msg = format!("<@{}> has {} :tickets:s!", name, amt);
-
+                let msg = format!("<@{}> has {} :tickets:s!", name, bank);
                 InteractionResponse::new().message(&msg).shout()
             }
 
-            "help" => InteractionResponse::new()
-                .message(&(build_help_message() + "\n" + &build_bank(amt)))
+            "rules" => InteractionResponse::new()
+                .message(&(build_rules_message() + "\n" + &build_bank(bank)))
                 .component_row(build_action_row())
                 .edit(),
 
