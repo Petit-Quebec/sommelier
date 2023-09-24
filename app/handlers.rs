@@ -5,7 +5,7 @@ mod do_game_of_life;
 
 pub use do_deedee::DeedeeHandler;
 pub use do_error::ErrorHandler;
-pub use do_gamble::GambleHandler;
+pub use do_gamble::{recognize_bank, GambleHandler};
 pub use do_game_of_life::{GameOfLifeHandler, SIZE};
 
 use crate::{InteractionRequest, InteractionResponse};

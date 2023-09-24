@@ -4,6 +4,7 @@
 
 use crate::handlers::Handler;
 use crate::{ActionRow, Button, InteractionRequest, InteractionResponse};
+use rand::{thread_rng, Rng};
 use regex::Regex;
 
 const FREE_AMT: u64 = 5;
@@ -43,7 +44,8 @@ fn build_roll_result(bet: u64, bank: u64) -> String {
     if bet > bank {
         "You can't roll on more :tickets:s than you have!\n".to_string() + &build_bank(bank)
     } else {
-        let roll = 3;
+        let mut rng = thread_rng();
+        let roll: u64 = rng.gen_range(0, 4);
         let winnings = roll * bet;
         let new_bank = bank - bet + winnings;
         format!("You rolled on {} :tickets:s...\n", bet)
@@ -53,7 +55,7 @@ fn build_roll_result(bet: u64, bank: u64) -> String {
     }
 }
 
-fn recognize_bank(hay: &str) -> u64 {
+pub fn recognize_bank(hay: &str) -> u64 {
     let pattern = BANK_PREFIX.to_string() + "[0-9]*" + BANK_SUFFIX;
     let re = Regex::new(&pattern).unwrap();
     let mut range = re.find(hay).unwrap().range();

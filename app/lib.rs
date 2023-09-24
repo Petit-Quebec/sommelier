@@ -70,7 +70,7 @@ mod tests {
 
     use super::*;
     use crate::InteractionCallbackType::*;
-    use handlers::SIZE;
+    use handlers::{recognize_bank, SIZE};
 
     fn anonymous_request(
         r#type: InteractionType,
@@ -174,6 +174,33 @@ mod tests {
         assert_eq!(buttons[1].r#type, ComponentType::Button);
         assert_eq!(buttons[2].r#type, ComponentType::Button);
         assert_eq!(buttons[3].r#type, ComponentType::Button);
+    }
+
+    #[test]
+    fn test_gamble_roll() {
+        let req_data = InteractionData {
+            name: None,
+            custom_id: Some("roll".to_string()),
+        };
+
+        let mut req = anonymous_request(MessageComponent, Some(req_data));
+
+        let interaction = MessageInteraction {
+            name: "gamble".to_string(),
+        };
+
+        let message = Message {
+            content: "You have: 3043 :tickets:s".to_string(),
+            interaction: Some(interaction),
+        };
+
+        req.message = Some(message);
+
+        let resp = handle_interaction(&req);
+
+        let new_bank = recognize_bank(&resp.data.content.unwrap());
+
+        assert_eq!(new_bank % 3043, 0);
     }
 
     #[test]
