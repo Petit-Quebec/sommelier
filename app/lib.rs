@@ -227,7 +227,7 @@ mod tests {
 
         assert_eq!(
             resp.data.content.unwrap(),
-            "You have: 3048 :star:s".to_string()
+            "You have: 3048 :star:s\nYou have: infinite **inspiration**".to_string()
         );
     }
 }

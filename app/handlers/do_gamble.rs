@@ -13,7 +13,9 @@ const SALT: &str = env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
-const BANK_SUFFIX: &str = " :star:s";
+const BANK_SUFFIX: &str = " :sparkles:s";
+const INSP_PREFIX: &str = "You have: ";
+const INSP_SUFFIX: &str = " **inspiration**";
 const PROOF_LENGTH: usize = 12;
 
 fn build_action_row() -> ActionRow {
@@ -30,32 +32,42 @@ fn build_action_row() -> ActionRow {
 }
 
 fn build_rules_message() -> String {
-    "## Instructions
-Roll to get 0x, 1x, 2x, or 3x odds on your betted :star:s. Use the **brag** button to tell others how many :star:s you have! 
-### Odds:
-- 25% 0x
-- 25% 1x
-- 25% 2x
-- 25% 3x
-".to_string()
+    "# Welcome to Elf Gambling :woman_elf:
+
+**Roll** to bet on your :sparkles:s, to receive 0x, 1x, 2x, or 3x the amount :sparkles:s back. There is a 25% chance of each of these happening.
+
+Additionally, whenever you roll, you have a chance to gain **inspiration**. The more of your saved :sparkles:s you roll on, the higher the chance that you'll gain **inspiration**.
+
+**Free** will give you a small number of :sparkles:s for free! No charge at all.
+
+**Brag** will consume one **inspiration** to **brag** about your score. Let your friends know how many :sparkles:s you've got! When you brag, you'll also be provided with proof of your achievement in a **sselvish**, a dialect of cryptographically secure elvish. 
+
+**Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!".to_string()
 }
 
-fn build_bank(n: u64) -> String {
-    BANK_PREFIX.to_string() + &n.to_string() + BANK_SUFFIX
+fn build_stats(n: u64) -> String {
+    "# Your Stats\n".to_string()
+        + BANK_PREFIX
+        + &n.to_string()
+        + BANK_SUFFIX
+        + "\n"
+        + INSP_PREFIX
+        + "infinite"
+        + INSP_SUFFIX
 }
 
 fn build_roll_result(bet: u64, bank: u64) -> String {
     if bet > bank {
-        "You can't roll on more :star:s than you have!\n".to_string() + &build_bank(bank)
+        "You can't roll on more :sparkles:s than you have!\n".to_string() + &build_stats(bank)
     } else {
         let mut rng = thread_rng();
         let roll: u64 = rng.gen_range(0, 4);
         let winnings = roll * bet;
         let new_bank = bank - bet + winnings;
-        format!("You rolled on {} :star:s...\n", bet)
+        format!("You rolled on {} :sparkles:s...\n", bet)
             + &format!("for a **{}**x multiplier!\n", roll)
-            + &format!("You **won** {} :star:s!\n", winnings)
-            + &build_bank(new_bank)
+            + &format!("You **won** {} :sparkles:s!\n", winnings)
+            + &build_stats(new_bank)
     }
 }
 
@@ -95,7 +107,8 @@ fn build_brag_result(id: &str, bank: u64) -> String {
 
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
-    format!("<@{}> has {} :star:s!\n", id, bank) + &format!("Proof: *{}*", translate_proof(&hash))
+    format!("<@{}> has {} :sparkles:s!\n", id, bank)
+        + &format!("Proof: *{}*", translate_proof(&hash))
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
@@ -122,7 +135,7 @@ pub struct GambleHandler;
 impl Handler for GambleHandler {
     fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
         InteractionResponse::new()
-            .message(&build_bank(STARTING_AMT))
+            .message(&(build_rules_message() + "\n" + &build_stats(0)))
             .component_row(build_action_row())
     }
 
@@ -144,7 +157,7 @@ impl Handler for GambleHandler {
                 .edit(),
 
             "free" => InteractionResponse::new()
-                .message(&build_bank(bank + FREE_AMT))
+                .message(&build_stats(bank + FREE_AMT))
                 .component_row(build_action_row())
                 .edit(),
 
@@ -155,7 +168,7 @@ impl Handler for GambleHandler {
             }
 
             "rules" => InteractionResponse::new()
-                .message(&(build_rules_message() + "\n" + &build_bank(bank)))
+                .message(&(build_rules_message() + "\n" + &build_stats(bank)))
                 .component_row(build_action_row())
                 .edit(),
 
