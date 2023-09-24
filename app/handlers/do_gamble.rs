@@ -14,6 +14,7 @@ const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
 const BANK_SUFFIX: &str = " :tickets:s";
+const PROOF_LENGTH: usize = 8;
 
 fn build_action_row() -> ActionRow {
     let roll_button = Button::new().label("roll").id("roll");
@@ -58,12 +59,53 @@ fn build_roll_result(bet: u64, bank: u64) -> String {
     }
 }
 
+fn translate_proof(hash: &[u8]) -> String {
+    let mut proof = "".to_string();
+
+    for i in 1..=PROOF_LENGTH {
+        let n = hash[i];
+
+        let prefix = n & 7;
+        let suffix = n >> 3 & 3;
+        let space = n >> 5 & 1;
+
+        proof += &match prefix {
+            0 => "d",
+            1 => "m",
+            2 => "g",
+            3 => "w",
+            4 => "p",
+            5 => "t",
+            6 => "f",
+            _ => "b",
+        }
+        .to_string();
+
+        proof += &match suffix {
+            0 => "oo",
+            1 => "a",
+            2 => "ee",
+            _ => "e",
+        }
+        .to_string();
+
+        proof += &match space {
+            0 => " ",
+            _ => "",
+        }
+        .to_string();
+    }
+
+    proof.trim().to_string()
+}
+
 fn build_brag_result(id: &str, bank: u64) -> String {
     let s = SALT.to_string() + id + &bank.to_string();
 
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
-    format!("<@{}> has {} :tickets:s!\n", id, bank) + &format!("Proof: {}", hash[0].to_string())
+    format!("<@{}> has {} :tickets:s!\n", id, bank)
+        + &format!("Proof: *{}*", translate_proof(&hash))
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
