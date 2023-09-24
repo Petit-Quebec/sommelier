@@ -110,13 +110,29 @@ fn translate_proof(hash: &[u8]) -> String {
     proof.trim().to_string()
 }
 
+fn honorific(amt: u64) -> String {
+    match amt {
+        0 => "a :monkey: Blatant Bonobo :monkey:",
+        1..=9 => "a :cucumber: Cool Cucumber :cucumber:",
+        10..=49 => "a :cut_of_meat: Sizzlin' Steak :cut_of_meat:",
+        50.. => "an :elf: Elegant Elf :elf:",
+    }
+    .to_string()
+}
+
 fn build_brag_result(id: &str, bank: u64) -> String {
     let s = SALT.to_string() + id + &bank.to_string();
 
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
-    format!("<@{}> has {} :sparkles:s!\n", id, bank)
-        + &format!("Proof: *{}*", translate_proof(&hash))
+    format!(
+        "# :elf:
+<@{}> has {} :sparkles:s! <@{}> is {}\n",
+        id,
+        bank,
+        id,
+        honorific(bank)
+    ) + &format!("**Proof**: *{}*", translate_proof(&hash))
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
