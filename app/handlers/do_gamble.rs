@@ -13,8 +13,8 @@ const SALT: &str = env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
-const BANK_SUFFIX: &str = " :tickets:s";
-const PROOF_LENGTH: usize = 10;
+const BANK_SUFFIX: &str = " :star:s";
+const PROOF_LENGTH: usize = 12;
 
 fn build_action_row() -> ActionRow {
     let roll_button = Button::new().label("roll").id("roll");
@@ -31,7 +31,7 @@ fn build_action_row() -> ActionRow {
 
 fn build_rules_message() -> String {
     "## Instructions
-Roll to get 0x, 1x, 2x, or 3x odds on your betted :tickets:s. Use the **brag** button to tell others how many :tickets:s you have! 
+Roll to get 0x, 1x, 2x, or 3x odds on your betted :star:s. Use the **brag** button to tell others how many :star:s you have! 
 ### Odds:
 - 25% 0x
 - 25% 1x
@@ -46,15 +46,15 @@ fn build_bank(n: u64) -> String {
 
 fn build_roll_result(bet: u64, bank: u64) -> String {
     if bet > bank {
-        "You can't roll on more :tickets:s than you have!\n".to_string() + &build_bank(bank)
+        "You can't roll on more :star:s than you have!\n".to_string() + &build_bank(bank)
     } else {
         let mut rng = thread_rng();
         let roll: u64 = rng.gen_range(0, 4);
         let winnings = roll * bet;
         let new_bank = bank - bet + winnings;
-        format!("You rolled on {} :tickets:s...\n", bet)
+        format!("You rolled on {} :star:s...\n", bet)
             + &format!("for a **{}**x multiplier!\n", roll)
-            + &format!("You **won** {} :tickets:s!\n", winnings)
+            + &format!("You **won** {} :star:s!\n", winnings)
             + &build_bank(new_bank)
     }
 }
@@ -66,24 +66,17 @@ fn translate_proof(hash: &[u8]) -> String {
         let n = hash[i];
 
         let prefix = n & 7;
-        let suffix = n >> 3 & 1;
-        let space = n >> 4 & 1;
+        let space = n >> 3 & 1;
 
         proof += &match prefix {
-            0 => "d",
-            1 => "m",
-            2 => "g",
-            3 => "w",
-            4 => "p",
-            5 => "t",
-            6 => "f",
-            _ => "b",
-        }
-        .to_string();
-
-        proof += &match suffix {
-            0 => "oo",
-            _ => "ee",
+            0 => "ba",
+            1 => "la",
+            2 => "ha",
+            3 => "no",
+            4 => "re",
+            5 => "na",
+            6 => "ne",
+            _ => "sha",
         }
         .to_string();
 
@@ -102,8 +95,7 @@ fn build_brag_result(id: &str, bank: u64) -> String {
 
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
-    format!("<@{}> has {} :tickets:s!\n", id, bank)
-        + &format!("Proof: *{}*", translate_proof(&hash))
+    format!("<@{}> has {} :star:s!\n", id, bank) + &format!("Proof: *{}*", translate_proof(&hash))
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
