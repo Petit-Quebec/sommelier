@@ -14,7 +14,7 @@ const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
 const BANK_SUFFIX: &str = " :tickets:s";
-const PROOF_LENGTH: usize = 8;
+const PROOF_LENGTH: usize = 10;
 
 fn build_action_row() -> ActionRow {
     let roll_button = Button::new().label("roll").id("roll");
@@ -66,8 +66,8 @@ fn translate_proof(hash: &[u8]) -> String {
         let n = hash[i];
 
         let prefix = n & 7;
-        let suffix = n >> 3 & 3;
-        let space = n >> 5 & 1;
+        let suffix = n >> 3 & 1;
+        let space = n >> 4 & 1;
 
         proof += &match prefix {
             0 => "d",
@@ -83,9 +83,7 @@ fn translate_proof(hash: &[u8]) -> String {
 
         proof += &match suffix {
             0 => "oo",
-            1 => "eee",
-            2 => "ee",
-            _ => "ooo",
+            _ => "ee",
         }
         .to_string();
 
