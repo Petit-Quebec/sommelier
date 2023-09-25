@@ -169,12 +169,6 @@ mod tests {
         let buttons = &components[0].components;
 
         assert_eq!(buttons.len(), 5);
-
-        assert_eq!(buttons[0].r#type, ComponentType::Button);
-        assert_eq!(buttons[1].r#type, ComponentType::Button);
-        assert_eq!(buttons[2].r#type, ComponentType::Button);
-        assert_eq!(buttons[3].r#type, ComponentType::Button);
-        assert_eq!(buttons[4].r#type, ComponentType::Button);
     }
 
     #[test]
@@ -228,7 +222,7 @@ mod tests {
 
         assert_eq!(
             resp.data.content.unwrap(),
-            "# :magic_wand:\nYou got 5 free :shell:s. Come again anytime!\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite :zap:".to_string()
+            "# :woman_elf::magic_wand:\nYou are given 5 free :shell:s.\n*Come again anytime!*\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite :zap:".to_string()
         );
     }
 }

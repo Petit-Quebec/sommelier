@@ -51,7 +51,7 @@ Additionally, whenever you roll, you have a chance to gain :zap:. The more of yo
 
 **Free** will give you a small number of :shell:s for free! No charge at all.
 
-**Brag** will consume :zap: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in a **sselvish**, a dialect of cryptographically secure elvish. 
+**Brag** will consume :zap: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish. 
 
 **Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!".to_string()
 }
@@ -146,12 +146,12 @@ fn build_brag_result(id: &str, bank: u64) -> String {
         bank,
         id,
         honorific(bank)
-    ) + &format!("**Proof**: *{}*", translate_proof(&hash))
+    ) + &format!("### Proof: *{}*", translate_proof(&hash))
 }
 
 fn build_recall_initiation(bank: u64) -> String {
     format!("# :woman_elf::leaves:
-Provide the amount you are claiming and the **sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :shell:s.
+Provide the amount you are claiming and the **Sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :shell:s.
 
 *By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", bank)
 }

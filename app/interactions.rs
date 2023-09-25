@@ -133,7 +133,7 @@ pub struct InteractionCallbackData {
 #[derive(Serialize, PartialEq, Debug)]
 pub struct ActionRow {
     pub r#type: ComponentType,
-    pub components: Vec<Button>,
+    pub components: Vec<Component>,
 }
 
 impl ActionRow {
@@ -145,9 +145,15 @@ impl ActionRow {
     }
 
     pub fn button(mut self, button: Button) -> Self {
-        self.components.push(button);
+        self.components.push(Component::Button(button));
         self
     }
+}
+
+#[derive(Serialize, PartialEq, Debug)]
+#[serde(untagged)]
+pub enum Component {
+    Button(Button),
 }
 
 #[derive(Serialize, PartialEq, Debug)]
