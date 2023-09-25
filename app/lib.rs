@@ -228,7 +228,7 @@ mod tests {
 
         assert_eq!(
             resp.data.content.unwrap(),
-            "# :magic_wand:\nYou got 5 free :shell:s. Come again anytime!\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite **inspiration**".to_string()
+            "# :magic_wand:\nYou got 5 free :shell:s. Come again anytime!\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite :zap:".to_string()
         );
     }
 }

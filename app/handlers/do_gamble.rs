@@ -15,7 +15,7 @@ const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
 const BANK_SUFFIX: &str = " :shell:s";
 const INSP_PREFIX: &str = "You have: ";
-const INSP_SUFFIX: &str = " **inspiration**";
+const INSP_SUFFIX: &str = " :zap:";
 const PROOF_LENGTH: usize = 12;
 
 fn build_action_row() -> ActionRow {
@@ -47,11 +47,11 @@ fn build_rules_message() -> String {
 
 **Roll** to bet on your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back. There is a 25% chance of each of these happening.
 
-Additionally, whenever you roll, you have a chance to gain **inspiration**. The more of your saved :shell:s you roll on, the higher the chance that you'll gain **inspiration**.
+Additionally, whenever you roll, you have a chance to gain :zap:. The more of your saved :shell:s you roll on, the higher the chance that you'll gain :zap:.
 
 **Free** will give you a small number of :shell:s for free! No charge at all.
 
-**Brag** will consume one **inspiration** to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in a **sselvish**, a dialect of cryptographically secure elvish. 
+**Brag** will consume :zap: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in a **sselvish**, a dialect of cryptographically secure elvish. 
 
 **Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!".to_string()
 }
@@ -75,10 +75,13 @@ fn build_roll_result(bet: u64, bank: u64) -> String {
         let roll: u64 = rng.gen_range(0, 4);
         let winnings = roll * bet;
         let new_bank = bank - bet + winnings;
-        format!("You rolled on {} :shell:s...\n", bet)
-            + &format!("for a **{}**x multiplier!\n", roll)
-            + &format!("You **won** {} :shell:s!\n", winnings)
-            + &build_stats(new_bank)
+        format!(
+            "# :woman_elf::slot_machine:
+You rolled on {} :shell:s...
+for a **{}x** multiplier.
+You **won** {} :shell:s!\n",
+            bet, roll, winnings
+        ) + &build_stats(new_bank)
     }
 }
 
