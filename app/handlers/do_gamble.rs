@@ -22,13 +22,24 @@ fn build_action_row() -> ActionRow {
     let roll_button = Button::new().label("roll").id("roll");
     let free_button = Button::new().label("free").id("free");
     let brag_button = Button::new().label("brag").id("brag");
-    let rules_button = Button::new().label("help").id("help");
+    let recall_button = Button::new().label("recall").id("recall");
+    let rules_button = Button::new().label("rules").id("rules");
 
     ActionRow::new()
         .button(roll_button)
         .button(free_button)
         .button(brag_button)
+        .button(recall_button)
         .button(rules_button)
+}
+
+fn build_recall_action_row() -> ActionRow {
+    let set_claim_button = Button::new().label("set claim").id("set claim");
+    let set_proof_button = Button::new().label("show proof").id("show proof");
+
+    ActionRow::new()
+        .button(set_claim_button)
+        .button(set_proof_button)
 }
 
 fn build_rules_message() -> String {
@@ -126,13 +137,18 @@ fn build_brag_result(id: &str, bank: u64) -> String {
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
     format!(
-        "# :elf:
-<@{}> has {} :sparkles:s! <@{}> is {}\n",
+        "## <@{}> has {} :sparkles:s!\n## <@{}> is {}\n",
         id,
         bank,
         id,
         honorific(bank)
     ) + &format!("**Proof**: *{}*", translate_proof(&hash))
+}
+
+fn build_recall_initiation(bank: u64) -> String {
+    format!("# :leaves: :man_elf: :leaves:
+Provide the amount you are claiming and the **sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :sparkles:s.
+:man_elf:: *By recalling your past achievement, you are leaving behind your current pool of {} :sparkles:s! If you're okay with that, we can proceed.*", bank)
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
@@ -190,6 +206,11 @@ impl Handler for GambleHandler {
                 let msg = build_brag_result(&name, bank);
                 InteractionResponse::new().message(&msg).shout()
             }
+
+            "recall" => InteractionResponse::new()
+                .message(&build_recall_initiation(bank))
+                .component_row(build_recall_action_row())
+                .edit(),
 
             "rules" => InteractionResponse::new()
                 .message(&(build_rules_message() + "\n" + &build_stats(bank)))

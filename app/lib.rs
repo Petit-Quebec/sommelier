@@ -168,12 +168,13 @@ mod tests {
 
         let buttons = &components[0].components;
 
-        assert_eq!(buttons.len(), 4);
+        assert_eq!(buttons.len(), 5);
 
         assert_eq!(buttons[0].r#type, ComponentType::Button);
         assert_eq!(buttons[1].r#type, ComponentType::Button);
         assert_eq!(buttons[2].r#type, ComponentType::Button);
         assert_eq!(buttons[3].r#type, ComponentType::Button);
+        assert_eq!(buttons[4].r#type, ComponentType::Button);
     }
 
     #[test]
