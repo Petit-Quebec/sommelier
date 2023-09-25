@@ -45,7 +45,7 @@ fn build_recall_action_row() -> ActionRow {
 fn build_rules_message() -> String {
     "# :woman_elf::shell: Shell Game :shell:
 
-**Roll** to bet on your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back. There is a 25% chance of each of these happening.
+**Roll** to bet your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back, with equal probability.
 
 Additionally, whenever you roll, you have a chance to gain :zap:. The more of your saved :shell:s you roll on, the higher the chance that you'll gain :zap:.
 
