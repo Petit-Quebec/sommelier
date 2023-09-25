@@ -30,7 +30,7 @@ fn select_handler(name: &str) -> Box<dyn Handler> {
 
         "deedee" => Box::new(DeedeeHandler),
 
-        "gamble" => Box::new(GambleHandler),
+        "shells" => Box::new(GambleHandler),
 
         _ => Box::new(ErrorHandler),
     }
@@ -154,7 +154,7 @@ mod tests {
     #[test]
     fn test_gamble() {
         let req_data = InteractionData {
-            name: Some("gamble".to_string()),
+            name: Some("shells".to_string()),
             custom_id: None,
         };
 
@@ -181,7 +181,7 @@ mod tests {
         let mut req = anonymous_request(MessageComponent, Some(req_data));
 
         let interaction = MessageInteraction {
-            name: "gamble".to_string(),
+            name: "shells".to_string(),
         };
 
         let message = Message {
@@ -208,7 +208,7 @@ mod tests {
         let mut req = anonymous_request(MessageComponent, Some(req_data));
 
         let interaction = MessageInteraction {
-            name: "gamble".to_string(),
+            name: "shells".to_string(),
         };
 
         let message = Message {

@@ -151,7 +151,7 @@ fn build_brag_result(id: &str, bank: u64) -> String {
 
 fn build_recall_initiation(bank: u64) -> String {
     format!("# :woman_elf::leaves:
-Provide the amount you are claiming and the **Sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :shell:s.
+Provide the number of :shell:s you are claiming and the **Sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :shell:s.
 
 *By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", bank)
 }
