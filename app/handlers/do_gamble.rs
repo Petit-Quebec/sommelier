@@ -43,7 +43,7 @@ fn build_recall_action_row() -> ActionRow {
 }
 
 fn build_rules_message() -> String {
-    "# Welcome to Elf Gambling :woman_elf:
+    "# :woman_elf::shell: Shell Game :shell:
 
 **Roll** to bet on your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back. There is a 25% chance of each of these happening.
 
@@ -87,8 +87,9 @@ You **won** {} :shell:s!\n",
 
 fn build_free_result(bank: u64) -> String {
     format!(
-        "# :magic_wand:
-You got {} free :shell:s. Come again anytime!\n",
+        "# :woman_elf::magic_wand:
+You are given {} free :shell:s.
+*Come again anytime!*\n",
         FREE_AMT
     ) + &build_stats(bank + FREE_AMT)
 }
@@ -149,9 +150,10 @@ fn build_brag_result(id: &str, bank: u64) -> String {
 }
 
 fn build_recall_initiation(bank: u64) -> String {
-    format!("# :leaves: :man_elf: :leaves:
+    format!("# :woman_elf::leaves:
 Provide the amount you are claiming and the **sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :shell:s.
-:man_elf:: *By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", bank)
+
+*By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", bank)
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
