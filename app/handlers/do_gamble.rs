@@ -13,7 +13,7 @@ const SALT: &str = env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
 const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
-const BANK_SUFFIX: &str = " :sparkles:s";
+const BANK_SUFFIX: &str = " :shell:s";
 const INSP_PREFIX: &str = "You have: ";
 const INSP_SUFFIX: &str = " **inspiration**";
 const PROOF_LENGTH: usize = 12;
@@ -45,13 +45,13 @@ fn build_recall_action_row() -> ActionRow {
 fn build_rules_message() -> String {
     "# Welcome to Elf Gambling :woman_elf:
 
-**Roll** to bet on your :sparkles:s, to receive 0x, 1x, 2x, or 3x the amount :sparkles:s back. There is a 25% chance of each of these happening.
+**Roll** to bet on your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back. There is a 25% chance of each of these happening.
 
-Additionally, whenever you roll, you have a chance to gain **inspiration**. The more of your saved :sparkles:s you roll on, the higher the chance that you'll gain **inspiration**.
+Additionally, whenever you roll, you have a chance to gain **inspiration**. The more of your saved :shell:s you roll on, the higher the chance that you'll gain **inspiration**.
 
-**Free** will give you a small number of :sparkles:s for free! No charge at all.
+**Free** will give you a small number of :shell:s for free! No charge at all.
 
-**Brag** will consume one **inspiration** to **brag** about your score. Let your friends know how many :sparkles:s you've got! When you brag, you'll also be provided with proof of your achievement in a **sselvish**, a dialect of cryptographically secure elvish. 
+**Brag** will consume one **inspiration** to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in a **sselvish**, a dialect of cryptographically secure elvish. 
 
 **Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!".to_string()
 }
@@ -69,15 +69,15 @@ fn build_stats(n: u64) -> String {
 
 fn build_roll_result(bet: u64, bank: u64) -> String {
     if bet > bank {
-        "You can't roll on more :sparkles:s than you have!\n".to_string() + &build_stats(bank)
+        "You can't roll on more :shell:s than you have!\n".to_string() + &build_stats(bank)
     } else {
         let mut rng = thread_rng();
         let roll: u64 = rng.gen_range(0, 4);
         let winnings = roll * bet;
         let new_bank = bank - bet + winnings;
-        format!("You rolled on {} :sparkles:s...\n", bet)
+        format!("You rolled on {} :shell:s...\n", bet)
             + &format!("for a **{}**x multiplier!\n", roll)
-            + &format!("You **won** {} :sparkles:s!\n", winnings)
+            + &format!("You **won** {} :shell:s!\n", winnings)
             + &build_stats(new_bank)
     }
 }
@@ -85,7 +85,7 @@ fn build_roll_result(bet: u64, bank: u64) -> String {
 fn build_free_result(bank: u64) -> String {
     format!(
         "# :magic_wand:
-You got {} free :sparkles:s. Come again anytime!\n",
+You got {} free :shell:s. Come again anytime!\n",
         FREE_AMT
     ) + &build_stats(bank + FREE_AMT)
 }
@@ -137,7 +137,7 @@ fn build_brag_result(id: &str, bank: u64) -> String {
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
     format!(
-        "## <@{}> has {} :sparkles:s!\n## <@{}> is {}\n",
+        "## <@{}> has {} :shell:s!\n## <@{}> is {}\n",
         id,
         bank,
         id,
@@ -147,8 +147,8 @@ fn build_brag_result(id: &str, bank: u64) -> String {
 
 fn build_recall_initiation(bank: u64) -> String {
     format!("# :leaves: :man_elf: :leaves:
-Provide the amount you are claiming and the **sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :sparkles:s.
-:man_elf:: *By recalling your past achievement, you are leaving behind your current pool of {} :sparkles:s! If you're okay with that, we can proceed.*", bank)
+Provide the amount you are claiming and the **sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :shell:s.
+:man_elf:: *By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", bank)
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {

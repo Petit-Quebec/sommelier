@@ -191,7 +191,7 @@ mod tests {
         };
 
         let message = Message {
-            content: "You have: 3043 :sparkles:s".to_string(),
+            content: "You have: 3043 :shell:s".to_string(),
             interaction: Some(interaction),
         };
 
@@ -218,7 +218,7 @@ mod tests {
         };
 
         let message = Message {
-            content: "You have: 3043 :sparkles:s".to_string(),
+            content: "You have: 3043 :shell:s".to_string(),
             interaction: Some(interaction),
         };
 
@@ -228,7 +228,7 @@ mod tests {
 
         assert_eq!(
             resp.data.content.unwrap(),
-            "# :magic_wand:\nYou got 5 free :sparkles:s. Come again anytime!\n# Your Stats\nYou have: 3048 :sparkles:s\nYou have: infinite **inspiration**".to_string()
+            "# :magic_wand:\nYou got 5 free :shell:s. Come again anytime!\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite **inspiration**".to_string()
         );
     }
 }
