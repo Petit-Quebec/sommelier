@@ -14,8 +14,18 @@ pub struct InteractionRequest {
     pub data: Option<InteractionData>,
     pub guild_id: Option<String>,
     pub channel_id: Option<String>,
-    pub member: Option<GuildMember>,
+    pub member: GuildMember,
     pub message: Option<Message>,
+}
+
+impl InteractionRequest {
+    pub fn message(&self) -> Option<String> {
+        Some(self.message.as_ref()?.content.clone())
+    }
+
+    pub fn user(&self) -> String {
+        self.member.user.id.clone()
+    }
 }
 
 #[derive(Deserialize_repr, PartialEq, Debug)]
@@ -34,7 +44,7 @@ pub struct InteractionData {
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct GuildMember {
-    pub user: Option<User>,
+    pub user: User,
     pub nick: Option<String>,
 }
 
@@ -52,13 +62,6 @@ pub struct MessageInteraction {
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct User {
     pub id: String,
-}
-
-#[derive(PartialEq, Debug)]
-pub struct InteractionMetadata<'a> {
-    pub user_id: &'a String,
-    pub channel_id: &'a String,
-    pub guild_id: &'a String,
 }
 
 #[derive(Serialize, PartialEq, Debug)]

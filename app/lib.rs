@@ -84,12 +84,12 @@ mod tests {
             data: data,
             guild_id: Some("DEBUG_GUILD_ID".to_string()),
             channel_id: Some("DEBUG_CHANNEL_ID".to_string()),
-            member: Some(GuildMember {
-                user: Some(User {
+            member: GuildMember {
+                user: User {
                     id: "DEBUG_USER_ID".to_string(),
-                }),
+                },
                 nick: Some("DEBUG_NICKNAME".to_string()),
-            }),
+            },
             message: Some(Message {
                 content: "DEBUG_MESSAGE_CONTENT".to_string(),
                 interaction: None,

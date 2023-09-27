@@ -2,6 +2,10 @@
  * Implementation of "gamble" command.
  */
 
+mod state;
+
+use state::GameState;
+
 use crate::handlers::Handler;
 use crate::{Component, InteractionRequest, InteractionResponse};
 use hex::FromHex;
@@ -59,7 +63,10 @@ fn build_stats(n: u64) -> String {
         + INSP_SUFFIX
 }
 
-fn build_roll_result(bet: u64, bank: u64) -> String {
+fn build_roll_result(gs: &GameState) -> String {
+    let bet = gs.bet();
+    let bank = gs.bank();
+
     if bet > bank {
         "You can't roll on more :shell:s than you have!\n".to_string() + &build_stats(bank)
     } else {
@@ -77,13 +84,13 @@ You **won** {} :shell:s!\n",
     }
 }
 
-fn build_free_result(bank: u64) -> String {
+fn build_free_result(gs: &GameState) -> String {
     format!(
         "# :woman_elf::magic_wand:
 You are given {} free :shell:s.
 *Come again anytime!*\n",
         FREE_AMT
-    ) + &build_stats(bank + FREE_AMT)
+    ) + &build_stats(gs.bank() + FREE_AMT)
 }
 
 fn translate_proof(hash: &[u8]) -> String {
@@ -127,8 +134,11 @@ fn honorific(amt: u64) -> String {
     .to_string()
 }
 
-fn build_brag_result(id: &str, bank: u64) -> String {
-    let s = SALT.to_string() + id + &bank.to_string();
+fn build_brag_result(gs: &GameState) -> String {
+    let id = gs.user();
+    let bank = gs.bank();
+
+    let s = SALT.to_string() + &id + &bank.to_string();
 
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
@@ -141,12 +151,12 @@ fn build_brag_result(id: &str, bank: u64) -> String {
     ) + &format!("### Proof: *{}*", translate_proof(&hash))
 }
 
-fn build_recall_initiation(bank: u64) -> String {
+fn build_recall_initiation(gs: &GameState) -> String {
     format!("# :woman_elf::leaves: Circle of Recall
 
 Provide the number of :shell:s you are claiming and the **Sselvish** proof of your past achievement. Only then can you recall your past :shell:s.
 
-*By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", bank)
+*By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", gs.bank())
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
@@ -156,16 +166,6 @@ pub fn recognize_bank(hay: &str) -> u64 {
     range.start += BANK_PREFIX.len();
     range.end -= BANK_SUFFIX.len();
     hay[range].parse::<u64>().unwrap_or(STARTING_AMT)
-}
-
-fn get_user_name(req: &InteractionRequest) -> String {
-    match &req.member {
-        Some(member) => match &member.user {
-            Some(user) => user.id.clone(),
-            None => "Someone".to_string(),
-        },
-        None => "Someone".to_string(),
-    }
 }
 
 pub struct ShellsHandler;
@@ -179,29 +179,27 @@ impl Handler for ShellsHandler {
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
-        let bank = recognize_bank(&req.message.as_ref().unwrap().content);
+        let gs: GameState = req.into();
 
         let id = req.data.as_ref().unwrap().custom_id.as_ref().unwrap();
 
         let res: InteractionResponse = match id.as_str() {
             "roll" => InteractionResponse::message()
-                .content(&build_roll_result(bank, bank))
+                .content(&build_roll_result(&gs))
                 .components(build_action_row()),
 
             "free" => InteractionResponse::message()
-                .content(&build_free_result(bank))
+                .content(&build_free_result(&gs))
                 .components(build_action_row()),
 
-            "brag" => {
-                let name = get_user_name(req);
-                let msg = build_brag_result(&name, bank);
-                InteractionResponse::message().content(&msg).shout()
-            }
+            "brag" => InteractionResponse::message()
+                .content(&build_brag_result(&gs))
+                .shout(),
 
-            "recall" => InteractionResponse::message().content(&build_recall_initiation(bank)),
+            "recall" => InteractionResponse::message().content(&build_recall_initiation(&gs)),
 
             "rules" => InteractionResponse::message()
-                .content(&(build_rules_message() + "\n" + &build_stats(bank)))
+                .content(&(build_rules_message() + "\n" + &gs.fmt()))
                 .components(build_action_row()),
 
             &_ => todo!(),
