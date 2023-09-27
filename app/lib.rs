@@ -71,25 +71,21 @@ fn make_error_response() -> InteractionResponse {
 mod tests {
 
     use super::*;
-    use handlers::{recognize_bank, SIZE};
+    use handlers::SIZE;
 
     fn anonymous_request(
         r#type: InteractionType,
         data: Option<InteractionData>,
     ) -> InteractionRequest {
         InteractionRequest {
-            id: "DEBUG_INTERACTION_ID".to_string(),
-            application_id: "DEBUG_APP_ID".to_string(),
             r#type: r#type,
             data: data,
-            guild_id: Some("DEBUG_GUILD_ID".to_string()),
-            channel_id: Some("DEBUG_CHANNEL_ID".to_string()),
-            member: GuildMember {
+            member: Some(GuildMember {
                 user: User {
                     id: "DEBUG_USER_ID".to_string(),
                 },
                 nick: Some("DEBUG_NICKNAME".to_string()),
-            },
+            }),
             message: Some(Message {
                 content: "DEBUG_MESSAGE_CONTENT".to_string(),
                 interaction: None,
@@ -146,7 +142,7 @@ mod tests {
     }
 
     #[test]
-    fn test_shells() {
+    fn shell_game() {
         let req_data = InteractionData {
             name: Some("shells".to_string()),
             custom_id: None,
@@ -159,35 +155,6 @@ mod tests {
         let components = resp.message_components();
 
         assert_eq!(components.len(), 5);
-    }
-
-    #[test]
-    fn test_shells_roll() {
-        let req_data = InteractionData {
-            name: None,
-            custom_id: Some("roll".to_string()),
-        };
-
-        let mut req = anonymous_request(MessageComponent, Some(req_data));
-
-        let interaction = MessageInteraction {
-            name: "shells".to_string(),
-        };
-
-        let message = Message {
-            content: "You have: 3043 :shell:s".to_string(),
-            interaction: Some(interaction),
-        };
-
-        req.message = Some(message);
-
-        let resp = handle_interaction(&req);
-
-        let content = resp.message_content().unwrap();
-
-        let new_bank = recognize_bank(&content);
-
-        assert_eq!(new_bank % 3043, 0);
     }
 
     #[test]

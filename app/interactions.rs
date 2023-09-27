@@ -8,23 +8,26 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct InteractionRequest {
-    pub id: String,
-    pub application_id: String,
     pub r#type: InteractionType,
     pub data: Option<InteractionData>,
-    pub guild_id: Option<String>,
-    pub channel_id: Option<String>,
-    pub member: GuildMember,
+    pub member: Option<GuildMember>,
     pub message: Option<Message>,
 }
 
 impl InteractionRequest {
-    pub fn message(&self) -> Option<String> {
-        Some(self.message.as_ref()?.content.clone())
+    pub fn user(&self) -> String {
+        match &self.member {
+            Some(m) => m.user.id.clone(),
+            None => "Unknown user".to_string(),
+        }
     }
 
-    pub fn user(&self) -> String {
-        self.member.user.id.clone()
+    pub fn message(&self) -> String {
+        match &self.message {
+            Some(m) => m.content.clone(),
+
+            None => "".to_string(),
+        }
     }
 }
 

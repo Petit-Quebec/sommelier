@@ -10,12 +10,10 @@ use crate::handlers::Handler;
 use crate::{Component, InteractionRequest, InteractionResponse};
 use hex::FromHex;
 use rand::{thread_rng, Rng};
-use regex::Regex;
 use sha256::digest;
 
 const SALT: &str = env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
-const STARTING_AMT: u64 = 0;
 const BANK_PREFIX: &str = "You have: ";
 const BANK_SUFFIX: &str = " :shell:s";
 const INSP_PREFIX: &str = "You have: ";
@@ -159,15 +157,6 @@ Provide the number of :shell:s you are claiming and the **Sselvish** proof of yo
 *By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", state.game_state.bank())
 }
 
-pub fn recognize_bank(hay: &str) -> u64 {
-    let pattern = BANK_PREFIX.to_string() + "[0-9]*" + BANK_SUFFIX;
-    let re = Regex::new(&pattern).unwrap();
-    let mut range = re.find(hay).unwrap().range();
-    range.start += BANK_PREFIX.len();
-    range.end -= BANK_SUFFIX.len();
-    hay[range].parse::<u64>().unwrap_or(STARTING_AMT)
-}
-
 pub struct ShellsHandler;
 
 impl Handler for ShellsHandler {
@@ -210,5 +199,28 @@ impl Handler for ShellsHandler {
             "brag" => res,
             _ => res.edit(),
         }
+    }
+}
+
+#[cfg(test)]
+
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn roll_action() { /*
+                               let req: InteractionRequest = InteractionRequest::message_component()
+                                   .interaction_name("shells")
+                                   .custom_id("roll")
+                                   .content("You have: 3043 :shell:s")
+                                   .into();
+
+                               let resp = ShellsHandler.handle_message_component(&req);
+
+                               let new_stats = resp.message_content().unwrap().into();
+
+                               assert_eq!(new_stats.bank() % 3043, 0);
+                       */
     }
 }

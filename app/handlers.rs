@@ -6,7 +6,7 @@ mod do_shells;
 pub use do_deedee::DeedeeHandler;
 pub use do_error::ErrorHandler;
 pub use do_game_of_life::{GameOfLifeHandler, SIZE};
-pub use do_shells::{recognize_bank, ShellsHandler};
+pub use do_shells::ShellsHandler;
 
 use crate::{InteractionRequest, InteractionResponse};
 

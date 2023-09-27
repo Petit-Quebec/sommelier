@@ -15,7 +15,7 @@ impl From<&InteractionRequest> for InteractionState {
     fn from(req: &InteractionRequest) -> Self {
         InteractionState {
             user: req.user(),
-            game_state: req.message().unwrap_or("".to_string()).into(),
+            game_state: req.message().into(),
         }
     }
 }
