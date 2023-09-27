@@ -63,8 +63,8 @@ pub struct InteractionMetadata<'a> {
 
 #[derive(Serialize, PartialEq, Debug)]
 pub struct InteractionResponse {
-    pub r#type: InteractionCallbackType,
-    pub data: InteractionCallbackData,
+    r#type: InteractionCallbackType,
+    data: InteractionCallbackData,
 }
 
 impl InteractionResponse {
@@ -151,9 +151,9 @@ pub enum InteractionCallbackData {
 
 #[derive(Serialize, PartialEq, Debug)]
 pub struct MessageCallbackData {
-    pub content: String,
-    pub flags: Option<MessageFlags>,
-    pub components: Vec<ActionRow>,
+    content: String,
+    flags: Option<MessageFlags>,
+    components: Vec<ActionRow>,
 }
 
 impl MessageCallbackData {
@@ -175,15 +175,15 @@ impl MessageCallbackData {
 
 #[derive(Serialize, PartialEq, Debug)]
 pub struct ModalCallbackData {
-    pub custom_id: String,
-    pub title: String,
-    pub components: Vec<Component>,
+    custom_id: String,
+    title: String,
+    components: Vec<Component>,
 }
 
 #[derive(Serialize, PartialEq, Debug)]
-pub struct ActionRow {
-    pub r#type: ComponentType,
-    pub components: Vec<Component>,
+struct ActionRow {
+    r#type: ComponentType,
+    components: Vec<Component>,
 }
 
 impl ActionRow {
@@ -207,6 +207,17 @@ pub enum Component {
     Text(TextInput),
 }
 
+impl Component {
+    pub fn button() -> Button {
+        Button {
+            r#type: ComponentType::Button,
+            label: None,
+            style: ButtonStyle::Primary,
+            custom_id: "unlabeled button".to_string(),
+        }
+    }
+}
+
 impl From<Button> for Component {
     fn from(button: Button) -> Component {
         Component::Button(button)
@@ -215,22 +226,13 @@ impl From<Button> for Component {
 
 #[derive(Serialize, PartialEq, Debug, Clone)]
 pub struct Button {
-    pub r#type: ComponentType,
-    pub label: Option<String>,
-    pub style: ButtonStyle,
-    pub custom_id: String,
+    r#type: ComponentType,
+    label: Option<String>,
+    style: ButtonStyle,
+    custom_id: String,
 }
 
 impl Button {
-    pub fn new() -> Self {
-        Button {
-            r#type: ComponentType::Button,
-            label: None,
-            style: ButtonStyle::Primary,
-            custom_id: "unlabeled button".to_string(),
-        }
-    }
-
     pub fn label(mut self, label: &str) -> Self {
         self.label = Some(label.to_string());
         self
@@ -244,10 +246,10 @@ impl Button {
 
 #[derive(Serialize, PartialEq, Debug, Clone)]
 pub struct TextInput {
-    pub r#type: ComponentType,
-    pub label: String,
-    pub style: TextInputStyle,
-    pub custom_id: String,
+    r#type: ComponentType,
+    label: String,
+    style: TextInputStyle,
+    custom_id: String,
 }
 
 impl TextInput {
@@ -272,13 +274,13 @@ impl TextInput {
 }
 
 #[derive(Serialize, PartialEq, Debug, Clone)]
-pub enum TextInputStyle {
+enum TextInputStyle {
     Short,
 }
 
 #[derive(Serialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
-pub enum ComponentType {
+enum ComponentType {
     ActionRow = 1,
     Button = 2,
     TextInput = 4,
@@ -286,12 +288,12 @@ pub enum ComponentType {
 
 #[derive(Serialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
-pub enum ButtonStyle {
+enum ButtonStyle {
     Primary = 1,
 }
 
 #[derive(Serialize_repr, PartialEq, Debug)]
 #[repr(u16)]
-pub enum MessageFlags {
+enum MessageFlags {
     Ephemeral = 64,
 }

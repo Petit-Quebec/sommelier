@@ -71,7 +71,6 @@ fn make_error_response() -> InteractionResponse {
 mod tests {
 
     use super::*;
-    use crate::InteractionCallbackType::*;
     use handlers::{recognize_bank, SIZE};
 
     fn anonymous_request(
@@ -104,7 +103,7 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        assert_eq!(resp.r#type, InteractionCallbackType::Pong);
+        assert_eq!(resp, InteractionResponse::pong());
     }
 
     #[test]
@@ -139,13 +138,9 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        let expected_resp_data = MessageCallbackData {
-            content: "mega doo doo".to_string(),
-            components: Vec::new(),
-            flags: Some(MessageFlags::Ephemeral),
-        };
-
-        let expected_resp: InteractionResponse = expected_resp_data.into();
+        let expected_resp = InteractionResponse::message()
+            .content("mega doo doo")
+            .into();
 
         assert_eq!(resp, expected_resp);
     }

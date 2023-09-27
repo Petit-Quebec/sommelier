@@ -3,7 +3,7 @@
  */
 
 use crate::handlers::Handler;
-use crate::{Button, Component, InteractionRequest, InteractionResponse};
+use crate::{Component, InteractionRequest, InteractionResponse};
 use hex::FromHex;
 use rand::{thread_rng, Rng};
 use regex::Regex;
@@ -19,11 +19,11 @@ const INSP_SUFFIX: &str = " :zap:";
 const PROOF_LENGTH: usize = 12;
 
 fn build_action_row() -> Vec<Component> {
-    let roll_button = Button::new().label("roll").id("roll").into();
-    let free_button = Button::new().label("free").id("free").into();
-    let brag_button = Button::new().label("brag").id("brag").into();
-    let recall_button = Button::new().label("recall").id("recall").into();
-    let rules_button = Button::new().label("rules").id("rules").into();
+    let roll_button = Component::button().label("roll").id("roll").into();
+    let free_button = Component::button().label("free").id("free").into();
+    let brag_button = Component::button().label("brag").id("brag").into();
+    let recall_button = Component::button().label("recall").id("recall").into();
+    let rules_button = Component::button().label("rules").id("rules").into();
 
     vec![
         roll_button,
