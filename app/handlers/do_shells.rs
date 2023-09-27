@@ -168,9 +168,9 @@ fn get_user_name(req: &InteractionRequest) -> String {
     }
 }
 
-pub struct GambleHandler;
+pub struct ShellsHandler;
 
-impl Handler for GambleHandler {
+impl Handler for ShellsHandler {
     fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
         InteractionResponse::message()
             .content(&(build_rules_message() + "\n" + &build_stats(0)))

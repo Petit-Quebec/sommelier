@@ -8,7 +8,7 @@ pub mod interactions;
 
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use handlers::{DeedeeHandler, ErrorHandler, GambleHandler, GameOfLifeHandler, Handler};
+use handlers::{DeedeeHandler, ErrorHandler, GameOfLifeHandler, Handler, ShellsHandler};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -30,7 +30,7 @@ fn select_handler(name: &str) -> Box<dyn Handler> {
 
         "deedee" => Box::new(DeedeeHandler),
 
-        "shells" => Box::new(GambleHandler),
+        "shells" => Box::new(ShellsHandler),
 
         _ => Box::new(ErrorHandler),
     }
@@ -146,7 +146,7 @@ mod tests {
     }
 
     #[test]
-    fn test_gamble() {
+    fn test_shells() {
         let req_data = InteractionData {
             name: Some("shells".to_string()),
             custom_id: None,
@@ -162,7 +162,7 @@ mod tests {
     }
 
     #[test]
-    fn test_gamble_roll() {
+    fn test_shells_roll() {
         let req_data = InteractionData {
             name: None,
             custom_id: Some("roll".to_string()),
@@ -191,7 +191,7 @@ mod tests {
     }
 
     #[test]
-    fn test_gamble_free() {
+    fn test_shells_free() {
         let req_data = InteractionData {
             name: None,
             custom_id: Some("free".to_string()),
