@@ -4,7 +4,7 @@
 
 mod state;
 
-use state::GameState;
+use state::InteractionState;
 
 use crate::handlers::Handler;
 use crate::{Component, InteractionRequest, InteractionResponse};
@@ -63,9 +63,9 @@ fn build_stats(n: u64) -> String {
         + INSP_SUFFIX
 }
 
-fn build_roll_result(gs: &GameState) -> String {
-    let bet = gs.bet();
-    let bank = gs.bank();
+fn build_roll_result(state: &InteractionState) -> String {
+    let bet = state.game_state.bet();
+    let bank = state.game_state.bank();
 
     if bet > bank {
         "You can't roll on more :shell:s than you have!\n".to_string() + &build_stats(bank)
@@ -84,13 +84,13 @@ You **won** {} :shell:s!\n",
     }
 }
 
-fn build_free_result(gs: &GameState) -> String {
+fn build_free_result(state: &InteractionState) -> String {
     format!(
         "# :woman_elf::magic_wand:
 You are given {} free :shell:s.
 *Come again anytime!*\n",
         FREE_AMT
-    ) + &build_stats(gs.bank() + FREE_AMT)
+    ) + &build_stats(state.game_state.bank() + FREE_AMT)
 }
 
 fn translate_proof(hash: &[u8]) -> String {
@@ -134,9 +134,9 @@ fn honorific(amt: u64) -> String {
     .to_string()
 }
 
-fn build_brag_result(gs: &GameState) -> String {
-    let id = gs.user();
-    let bank = gs.bank();
+fn build_brag_result(state: &InteractionState) -> String {
+    let id = &state.user;
+    let bank = state.game_state.bank();
 
     let s = SALT.to_string() + &id + &bank.to_string();
 
@@ -151,12 +151,12 @@ fn build_brag_result(gs: &GameState) -> String {
     ) + &format!("### Proof: *{}*", translate_proof(&hash))
 }
 
-fn build_recall_initiation(gs: &GameState) -> String {
+fn build_recall_initiation(state: &InteractionState) -> String {
     format!("# :woman_elf::leaves: Circle of Recall
 
 Provide the number of :shell:s you are claiming and the **Sselvish** proof of your past achievement. Only then can you recall your past :shell:s.
 
-*By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", gs.bank())
+*By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", state.game_state.bank())
 }
 
 pub fn recognize_bank(hay: &str) -> u64 {
@@ -179,27 +179,27 @@ impl Handler for ShellsHandler {
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
-        let gs: GameState = req.into();
+        let state: InteractionState = req.into();
 
         let id = req.data.as_ref().unwrap().custom_id.as_ref().unwrap();
 
         let res: InteractionResponse = match id.as_str() {
             "roll" => InteractionResponse::message()
-                .content(&build_roll_result(&gs))
+                .content(&build_roll_result(&state))
                 .components(build_action_row()),
 
             "free" => InteractionResponse::message()
-                .content(&build_free_result(&gs))
+                .content(&build_free_result(&state))
                 .components(build_action_row()),
 
             "brag" => InteractionResponse::message()
-                .content(&build_brag_result(&gs))
+                .content(&build_brag_result(&state))
                 .shout(),
 
-            "recall" => InteractionResponse::message().content(&build_recall_initiation(&gs)),
+            "recall" => InteractionResponse::message().content(&build_recall_initiation(&state)),
 
             "rules" => InteractionResponse::message()
-                .content(&(build_rules_message() + "\n" + &gs.fmt()))
+                .content(&(build_rules_message() + "\n" + &state.game_state.fmt()))
                 .components(build_action_row()),
 
             &_ => todo!(),
