@@ -3,7 +3,7 @@
  */
 
 use crate::handlers::Handler;
-use crate::{ActionRow, Button, InteractionRequest, InteractionResponse};
+use crate::{Button, Component, InteractionRequest, InteractionResponse};
 use hex::FromHex;
 use rand::{thread_rng, Rng};
 use regex::Regex;
@@ -18,28 +18,20 @@ const INSP_PREFIX: &str = "You have: ";
 const INSP_SUFFIX: &str = " :zap:";
 const PROOF_LENGTH: usize = 12;
 
-fn build_action_row() -> ActionRow {
-    let roll_button = Button::new().label("roll").id("roll");
-    let free_button = Button::new().label("free").id("free");
-    let brag_button = Button::new().label("brag").id("brag");
-    let recall_button = Button::new().label("recall").id("recall");
-    let rules_button = Button::new().label("rules").id("rules");
+fn build_action_row() -> Vec<Component> {
+    let roll_button = Button::new().label("roll").id("roll").into();
+    let free_button = Button::new().label("free").id("free").into();
+    let brag_button = Button::new().label("brag").id("brag").into();
+    let recall_button = Button::new().label("recall").id("recall").into();
+    let rules_button = Button::new().label("rules").id("rules").into();
 
-    ActionRow::new()
-        .button(roll_button)
-        .button(free_button)
-        .button(brag_button)
-        .button(recall_button)
-        .button(rules_button)
-}
-
-fn build_recall_action_row() -> ActionRow {
-    let set_claim_button = Button::new().label("set claim").id("set claim");
-    let set_proof_button = Button::new().label("show proof").id("show proof");
-
-    ActionRow::new()
-        .button(set_claim_button)
-        .button(set_proof_button)
+    vec![
+        roll_button,
+        free_button,
+        brag_button,
+        recall_button,
+        rules_button,
+    ]
 }
 
 fn build_rules_message() -> String {
@@ -150,8 +142,9 @@ fn build_brag_result(id: &str, bank: u64) -> String {
 }
 
 fn build_recall_initiation(bank: u64) -> String {
-    format!("# :woman_elf::leaves:
-Provide the number of :shell:s you are claiming and the **Sselvish** proof of your past achievement. Only then can the :man_elf: help you recall your past :shell:s.
+    format!("# :woman_elf::leaves: Circle of Recall
+
+Provide the number of :shell:s you are claiming and the **Sselvish** proof of your past achievement. Only then can you recall your past :shell:s.
 
 *By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", bank)
 }
@@ -179,9 +172,10 @@ pub struct GambleHandler;
 
 impl Handler for GambleHandler {
     fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
-        InteractionResponse::new()
-            .message(&(build_rules_message() + "\n" + &build_stats(0)))
-            .component_row(build_action_row())
+        InteractionResponse::message()
+            .content(&(build_rules_message() + "\n" + &build_stats(0)))
+            .components(build_action_row())
+            .into()
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
@@ -196,33 +190,28 @@ impl Handler for GambleHandler {
             .unwrap()
             .as_str()
         {
-            "roll" => InteractionResponse::new()
-                .message(&build_roll_result(bank, bank))
-                .component_row(build_action_row())
-                .edit(),
+            "roll" => InteractionResponse::message()
+                .content(&build_roll_result(bank, bank))
+                .components(build_action_row()),
 
-            "free" => InteractionResponse::new()
-                .message(&build_free_result(bank))
-                .component_row(build_action_row())
-                .edit(),
+            "free" => InteractionResponse::message()
+                .content(&build_free_result(bank))
+                .components(build_action_row()),
 
             "brag" => {
                 let name = get_user_name(req);
                 let msg = build_brag_result(&name, bank);
-                InteractionResponse::new().message(&msg).shout()
+                InteractionResponse::message().content(&msg).shout()
             }
 
-            "recall" => InteractionResponse::new()
-                .message(&build_recall_initiation(bank))
-                .component_row(build_recall_action_row())
-                .edit(),
+            "recall" => InteractionResponse::message().content(&build_recall_initiation(bank)),
 
-            "rules" => InteractionResponse::new()
-                .message(&(build_rules_message() + "\n" + &build_stats(bank)))
-                .component_row(build_action_row())
-                .edit(),
+            "rules" => InteractionResponse::message()
+                .content(&(build_rules_message() + "\n" + &build_stats(bank)))
+                .components(build_action_row()),
 
             &_ => todo!(),
         }
+        .into()
     }
 }

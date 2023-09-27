@@ -62,7 +62,9 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
 }
 
 fn make_error_response() -> InteractionResponse {
-    InteractionResponse::new().message("Something erroneous happened...")
+    InteractionResponse::message()
+        .content("Something erroneous happened...")
+        .into()
 }
 
 #[cfg(test)]
@@ -116,7 +118,7 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        let content = resp.data.content.expect("no content in data!");
+        let content = resp.message_content().unwrap();
 
         let resp_emoji_count = content.matches("🌝").count() + content.matches("🌚").count();
 
@@ -137,16 +139,13 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        let expected_resp_data = InteractionCallbackData {
-            content: Some("mega doo doo".to_string()),
+        let expected_resp_data = MessageCallbackData {
+            content: "mega doo doo".to_string(),
             components: Vec::new(),
             flags: Some(MessageFlags::Ephemeral),
         };
 
-        let expected_resp = InteractionResponse {
-            r#type: ChannelMessageWithSource,
-            data: expected_resp_data,
-        };
+        let expected_resp: InteractionResponse = expected_resp_data.into();
 
         assert_eq!(resp, expected_resp);
     }
@@ -162,13 +161,9 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        let components = resp.data.components;
+        let components = resp.message_components();
 
-        assert_eq!(components.len(), 1);
-
-        let buttons = &components[0].components;
-
-        assert_eq!(buttons.len(), 5);
+        assert_eq!(components.len(), 5);
     }
 
     #[test]
@@ -193,7 +188,9 @@ mod tests {
 
         let resp = handle_interaction(&req);
 
-        let new_bank = recognize_bank(&resp.data.content.unwrap());
+        let content = resp.message_content().unwrap();
+
+        let new_bank = recognize_bank(&content);
 
         assert_eq!(new_bank % 3043, 0);
     }
@@ -221,7 +218,7 @@ mod tests {
         let resp = handle_interaction(&req);
 
         assert_eq!(
-            resp.data.content.unwrap(),
+            resp.message_content().unwrap(),
             "# :woman_elf::magic_wand:\nYou are given 5 free :shell:s.\n*Come again anytime!*\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite :zap:".to_string()
         );
     }

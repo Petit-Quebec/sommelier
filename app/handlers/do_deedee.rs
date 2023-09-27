@@ -9,6 +9,8 @@ pub struct DeedeeHandler;
 
 impl Handler for DeedeeHandler {
     fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
-        InteractionResponse::new().message("mega doo doo")
+        InteractionResponse::message()
+            .content("mega doo doo")
+            .into()
     }
 }

@@ -68,29 +68,24 @@ pub struct InteractionResponse {
 }
 
 impl InteractionResponse {
-    pub fn new() -> Self {
-        let data = InteractionCallbackData {
-            content: None,
-            flags: Some(MessageFlags::Ephemeral),
-            components: Vec::new(),
-        };
-
-        InteractionResponse {
-            r#type: InteractionCallbackType::ChannelMessageWithSource,
-            data: data,
-        }
-    }
-
     pub fn pong() -> Self {
-        let data = InteractionCallbackData {
-            content: None,
-            flags: Some(MessageFlags::Ephemeral),
+        let data = MessageCallbackData {
+            content: "".to_string(),
+            flags: None,
             components: Vec::new(),
         };
 
         InteractionResponse {
             r#type: InteractionCallbackType::Pong,
-            data: data,
+            data: InteractionCallbackData::Message(data),
+        }
+    }
+
+    pub fn message() -> MessageCallbackData {
+        MessageCallbackData {
+            content: "".to_string(),
+            flags: Some(MessageFlags::Ephemeral),
+            components: Vec::new(),
         }
     }
 
@@ -99,19 +94,42 @@ impl InteractionResponse {
         self
     }
 
-    pub fn message(mut self, msg: &str) -> Self {
-        self.data.content = Some(msg.to_string());
-        self
+    pub fn message_content(&self) -> Option<String> {
+        match &self.data {
+            InteractionCallbackData::Message(m) => Some(m.content.clone()),
+            _ => None,
+        }
     }
 
-    pub fn component_row(mut self, row: ActionRow) -> Self {
-        self.data.components.push(row);
-        self
+    pub fn message_components(&self) -> Vec<Component> {
+        match &self.data {
+            InteractionCallbackData::Message(m) => {
+                if m.components.len() != 1 {
+                    panic!();
+                } else {
+                    m.components[0].components.clone()
+                }
+            }
+            _ => panic!(),
+        }
     }
+}
 
-    pub fn shout(mut self) -> Self {
-        self.data.flags = None;
-        self
+impl From<ModalCallbackData> for InteractionResponse {
+    fn from(data: ModalCallbackData) -> InteractionResponse {
+        InteractionResponse {
+            r#type: InteractionCallbackType::Modal,
+            data: InteractionCallbackData::Modal(data),
+        }
+    }
+}
+
+impl From<MessageCallbackData> for InteractionResponse {
+    fn from(data: MessageCallbackData) -> InteractionResponse {
+        InteractionResponse {
+            r#type: InteractionCallbackType::ChannelMessageWithSource,
+            data: InteractionCallbackData::Message(data),
+        }
     }
 }
 
@@ -121,13 +139,45 @@ pub enum InteractionCallbackType {
     Pong = 1,
     ChannelMessageWithSource = 4,
     UpdateMessage = 7,
+    Modal = 9,
 }
 
 #[derive(Serialize, PartialEq, Debug)]
-pub struct InteractionCallbackData {
-    pub content: Option<String>,
+#[serde(untagged)]
+pub enum InteractionCallbackData {
+    Message(MessageCallbackData),
+    Modal(ModalCallbackData),
+}
+
+#[derive(Serialize, PartialEq, Debug)]
+pub struct MessageCallbackData {
+    pub content: String,
     pub flags: Option<MessageFlags>,
     pub components: Vec<ActionRow>,
+}
+
+impl MessageCallbackData {
+    pub fn content(mut self, msg: &str) -> Self {
+        self.content = msg.to_string();
+        self
+    }
+
+    pub fn components(mut self, components: Vec<Component>) -> Self {
+        self.components = vec![ActionRow::new().components(components)];
+        self
+    }
+
+    pub fn shout(mut self) -> Self {
+        self.flags = None;
+        self
+    }
+}
+
+#[derive(Serialize, PartialEq, Debug)]
+pub struct ModalCallbackData {
+    pub custom_id: String,
+    pub title: String,
+    pub components: Vec<Component>,
 }
 
 #[derive(Serialize, PartialEq, Debug)]
@@ -144,19 +194,26 @@ impl ActionRow {
         }
     }
 
-    pub fn button(mut self, button: Button) -> Self {
-        self.components.push(Component::Button(button));
+    pub fn components(mut self, components: Vec<Component>) -> Self {
+        self.components = components;
         self
     }
 }
 
-#[derive(Serialize, PartialEq, Debug)]
+#[derive(Serialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum Component {
     Button(Button),
+    Text(TextInput),
 }
 
-#[derive(Serialize, PartialEq, Debug)]
+impl From<Button> for Component {
+    fn from(button: Button) -> Component {
+        Component::Button(button)
+    }
+}
+
+#[derive(Serialize, PartialEq, Debug, Clone)]
 pub struct Button {
     pub r#type: ComponentType,
     pub label: Option<String>,
@@ -185,14 +242,49 @@ impl Button {
     }
 }
 
-#[derive(Serialize_repr, PartialEq, Debug)]
+#[derive(Serialize, PartialEq, Debug, Clone)]
+pub struct TextInput {
+    pub r#type: ComponentType,
+    pub label: String,
+    pub style: TextInputStyle,
+    pub custom_id: String,
+}
+
+impl TextInput {
+    pub fn new() -> Self {
+        TextInput {
+            r#type: ComponentType::TextInput,
+            label: "".to_string(),
+            style: TextInputStyle::Short,
+            custom_id: "unlabeled text input".to_string(),
+        }
+    }
+
+    pub fn label(mut self, label: &str) -> Self {
+        self.label = label.to_string();
+        self
+    }
+
+    pub fn id(mut self, id: &str) -> Self {
+        self.custom_id = id.to_string();
+        self
+    }
+}
+
+#[derive(Serialize, PartialEq, Debug, Clone)]
+pub enum TextInputStyle {
+    Short,
+}
+
+#[derive(Serialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
 pub enum ComponentType {
     ActionRow = 1,
     Button = 2,
+    TextInput = 4,
 }
 
-#[derive(Serialize_repr, PartialEq, Debug)]
+#[derive(Serialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
 pub enum ButtonStyle {
     Primary = 1,
