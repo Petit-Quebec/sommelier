@@ -181,15 +181,9 @@ impl Handler for GambleHandler {
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
         let bank = recognize_bank(&req.message.as_ref().unwrap().content);
 
-        match req
-            .data
-            .as_ref()
-            .unwrap()
-            .custom_id
-            .as_ref()
-            .unwrap()
-            .as_str()
-        {
+        let id = req.data.as_ref().unwrap().custom_id.as_ref().unwrap();
+
+        let res: InteractionResponse = match id.as_str() {
             "roll" => InteractionResponse::message()
                 .content(&build_roll_result(bank, bank))
                 .components(build_action_row()),
@@ -212,6 +206,11 @@ impl Handler for GambleHandler {
 
             &_ => todo!(),
         }
-        .into()
+        .into();
+
+        match id.as_str() {
+            "brag" => res,
+            _ => res.edit(),
+        }
     }
 }
