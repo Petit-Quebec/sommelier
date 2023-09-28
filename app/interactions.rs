@@ -95,6 +95,14 @@ impl InteractionResponse {
         }
     }
 
+    pub fn modal() -> ModalCallbackData {
+        ModalCallbackData {
+            custom_id: "".to_string(),
+            title: "".to_string(),
+            components: Vec::new(),
+        }
+    }
+
     pub fn edit(mut self) -> Self {
         self.r#type = InteractionCallbackType::UpdateMessage;
         self
@@ -183,7 +191,24 @@ impl MessageCallbackData {
 pub struct ModalCallbackData {
     custom_id: String,
     title: String,
-    components: Vec<Component>,
+    components: Vec<ActionRow>,
+}
+
+impl ModalCallbackData {
+    pub fn id(mut self, id: &str) -> Self {
+        self.custom_id = id.to_string();
+        self
+    }
+
+    pub fn title(mut self, title: &str) -> Self {
+        self.title = title.to_string();
+        self
+    }
+
+    pub fn components(mut self, components: Vec<Component>) -> Self {
+        self.components = vec![ActionRow::new().components(components)];
+        self
+    }
 }
 
 #[derive(Serialize, PartialEq, Debug)]
@@ -222,11 +247,21 @@ impl Component {
             custom_id: "unlabeled button".to_string(),
         }
     }
+
+    pub fn text_input() -> TextInput {
+        TextInput::new()
+    }
 }
 
 impl From<Button> for Component {
     fn from(button: Button) -> Component {
         Component::Button(button)
+    }
+}
+
+impl From<TextInput> for Component {
+    fn from(text: TextInput) -> Component {
+        Component::Text(text)
     }
 }
 
@@ -279,9 +314,10 @@ impl TextInput {
     }
 }
 
-#[derive(Serialize, PartialEq, Debug, Clone)]
+#[derive(Serialize_repr, PartialEq, Debug, Clone)]
+#[repr(u8)]
 enum TextInputStyle {
-    Short,
+    Short = 1,
 }
 
 #[derive(Serialize_repr, PartialEq, Debug, Clone)]

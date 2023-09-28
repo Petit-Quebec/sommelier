@@ -36,6 +36,12 @@ fn build_action_row() -> Vec<Component> {
     ]
 }
 
+fn build_ar2() -> Vec<Component> {
+    let text_1 = Component::text_input().label("label").id("id").into();
+
+    vec![text_1]
+}
+
 fn build_rules_message() -> String {
     "# :woman_elf::shell: Shell Game :shell:
 
@@ -175,28 +181,36 @@ impl Handler for ShellsHandler {
         let res: InteractionResponse = match id.as_str() {
             "roll" => InteractionResponse::message()
                 .content(&build_roll_result(&state))
-                .components(build_action_row()),
+                .components(build_action_row())
+                .into(),
 
             "free" => InteractionResponse::message()
                 .content(&build_free_result(&state))
-                .components(build_action_row()),
+                .components(build_action_row())
+                .into(),
 
             "brag" => InteractionResponse::message()
                 .content(&build_brag_result(&state))
-                .shout(),
+                .shout()
+                .into(),
 
-            "recall" => InteractionResponse::message().content(&build_recall_initiation(&state)),
+            "recall" => InteractionResponse::modal()
+                .id("test id")
+                .title("test title")
+                .components(build_ar2())
+                .into(),
 
             "rules" => InteractionResponse::message()
                 .content(&(build_rules_message() + "\n" + &state.game_state.fmt()))
-                .components(build_action_row()),
+                .components(build_action_row())
+                .into(),
 
             &_ => todo!(),
-        }
-        .into();
+        };
 
         match id.as_str() {
             "brag" => res,
+            "recall" => res,
             _ => res.edit(),
         }
     }
@@ -207,20 +221,36 @@ impl Handler for ShellsHandler {
 mod tests {
 
     use super::*;
-
+    use crate::handlers::do_shells::state::GameState;
+    use crate::InteractionData;
+/*
     #[test]
-    fn roll_action() { /*
-                               let req: InteractionRequest = InteractionRequest::message_component()
-                                   .interaction_name("shells")
-                                   .custom_id("roll")
-                                   .content("You have: 3043 :shell:s")
-                                   .into();
+    fn roll_action() {
+        let req_data = InteractionData {
+            name: None,
+            custom_id: Some("roll".to_string()),
+        };
 
-                               let resp = ShellsHandler.handle_message_component(&req);
+        let mut req = anonymous_request(MessageComponent, Some(req_data));
 
-                               let new_stats = resp.message_content().unwrap().into();
+        let interaction = MessageInteraction {
+            name: "shells".to_string(),
+        };
 
-                               assert_eq!(new_stats.bank() % 3043, 0);
-                       */
+        let message = Message {
+            content: "You have: 3043 :shell:s".to_string(),
+            interaction: Some(interaction),
+        };
+
+        req.message = Some(message);
+
+        let resp = handle_interaction(&req);
+
+        let content = resp.message_content().unwrap();
+
+        let state: GameState = content.into();
+
+        assert_eq!(state.bank() % 3043, 0);
     }
+    */
 }
