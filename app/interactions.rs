@@ -206,7 +206,10 @@ impl ModalCallbackData {
     }
 
     pub fn components(mut self, components: Vec<Component>) -> Self {
-        self.components = vec![ActionRow::new().components(components)];
+        self.components = components
+            .iter()
+            .map(|c| ActionRow::new().components(vec![c.clone()]))
+            .collect();
         self
     }
 }

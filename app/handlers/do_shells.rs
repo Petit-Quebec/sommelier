@@ -36,10 +36,11 @@ fn build_action_row() -> Vec<Component> {
     ]
 }
 
-fn build_ar2() -> Vec<Component> {
-    let text_1 = Component::text_input().label("label").id("id").into();
+fn build_recall_fields() -> Vec<Component> {
+    let claim = Component::text_input().label("claim").id("claim").into();
+    let proof = Component::text_input().label("proof").id("proof").into();
 
-    vec![text_1]
+    vec![claim, proof]
 }
 
 fn build_rules_message() -> String {
@@ -195,9 +196,9 @@ impl Handler for ShellsHandler {
                 .into(),
 
             "recall" => InteractionResponse::modal()
-                .id("test id")
-                .title("test title")
-                .components(build_ar2())
+                .id("recall")
+                .title(":leaves: Circle of Recall :leaves:")
+                .components(build_recall_fields())
                 .into(),
 
             "rules" => InteractionResponse::message()
@@ -217,21 +218,18 @@ impl Handler for ShellsHandler {
 }
 
 #[cfg(test)]
-
 mod tests {
 
     use super::*;
     use crate::handlers::do_shells::state::GameState;
-    use crate::InteractionData;
-/*
+    use crate::{GuildMember, InteractionData, InteractionType, Message, MessageInteraction, User};
+
     #[test]
     fn roll_action() {
-        let req_data = InteractionData {
+        let data = InteractionData {
             name: None,
             custom_id: Some("roll".to_string()),
         };
-
-        let mut req = anonymous_request(MessageComponent, Some(req_data));
 
         let interaction = MessageInteraction {
             name: "shells".to_string(),
@@ -242,9 +240,19 @@ mod tests {
             interaction: Some(interaction),
         };
 
-        req.message = Some(message);
+        let req = InteractionRequest {
+            r#type: InteractionType::MessageComponent,
+            data: Some(data),
+            message: Some(message),
+            member: Some(GuildMember {
+                user: User {
+                    id: "DEBUG_USER_ID".to_string(),
+                },
+                nick: Some("DEBUG_NICKNAME".to_string()),
+            }),
+        };
 
-        let resp = handle_interaction(&req);
+        let resp = ShellsHandler.handle_message_component(&req);
 
         let content = resp.message_content().unwrap();
 
@@ -252,5 +260,4 @@ mod tests {
 
         assert_eq!(state.bank() % 3043, 0);
     }
-    */
 }
