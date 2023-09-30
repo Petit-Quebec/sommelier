@@ -176,7 +176,7 @@ impl Handler for ShellsHandler {
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
         let state: InteractionState = req.into();
 
-        let id = req.data.as_ref().unwrap().custom_id.as_ref().unwrap();
+        let id = req.custom_id().unwrap();
 
         let res: InteractionResponse = match id.as_str() {
             "roll" => InteractionResponse::message()
@@ -219,6 +219,13 @@ impl Handler for ShellsHandler {
             _ => res.edit(),
         }
     }
+
+    fn handle_modal_submit(&self, _: &InteractionRequest) -> InteractionResponse {
+        InteractionResponse::message()
+            .content(&(build_rules_message() + "\n" + &build_stats(0)))
+            .components(build_action_row())
+            .into()
+    }
 }
 
 #[cfg(test)]
@@ -226,15 +233,10 @@ mod tests {
 
     use super::*;
     use crate::handlers::do_shells::state::GameState;
-    use crate::{GuildMember, InteractionData, InteractionType, Message, MessageInteraction, User};
+    use crate::{GuildMember, Message, MessageInteraction};
 
     #[test]
-    fn roll_action() {
-        let data = InteractionData {
-            name: None,
-            custom_id: Some("roll".to_string()),
-        };
-
+    fn roll() {
         let interaction = MessageInteraction {
             name: "shells".to_string(),
         };
@@ -244,17 +246,9 @@ mod tests {
             interaction: Some(interaction),
         };
 
-        let req = InteractionRequest {
-            r#type: InteractionType::MessageComponent,
-            data: Some(data),
-            message: Some(message),
-            member: Some(GuildMember {
-                user: User {
-                    id: "DEBUG_USER_ID".to_string(),
-                },
-                nick: Some("DEBUG_NICKNAME".to_string()),
-            }),
-        };
+        let req: InteractionRequest = InteractionRequest::message_component("roll", 0).into();
+
+        let req = req.message(message).member(GuildMember::new("some user"));
 
         let resp = ShellsHandler.handle_message_component(&req);
 
@@ -263,5 +257,28 @@ mod tests {
         let state: GameState = content.into();
 
         assert_eq!(state.bank() % 3043, 0);
+    }
+
+    #[test]
+    fn free() {
+        let interaction = MessageInteraction {
+            name: "shells".to_string(),
+        };
+
+        let message = Message {
+            content: "You have: 3043 :shell:s".to_string(),
+            interaction: Some(interaction),
+        };
+
+        let req: InteractionRequest = InteractionRequest::message_component("free", 0).into();
+
+        let req = req.message(message).member(GuildMember::new("some user"));
+
+        let resp = ShellsHandler.handle_message_component(&req);
+
+        assert_eq!(
+            resp.message_content().unwrap(),
+            "# :woman_elf::magic_wand:\nYou are given 5 free :shell:s.\n*Come again anytime!*\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite :zap:".to_string()
+        );
     }
 }

@@ -14,8 +14,8 @@ pub struct InteractionState {
 impl From<&InteractionRequest> for InteractionState {
     fn from(req: &InteractionRequest) -> Self {
         InteractionState {
-            user: req.user(),
-            game_state: req.message().into(),
+            user: req.get_user(),
+            game_state: req.message_content().into(),
         }
     }
 }

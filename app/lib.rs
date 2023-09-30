@@ -39,13 +39,8 @@ fn select_handler(name: &str) -> Box<dyn Handler> {
 }
 
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
-    match &request.data {
-        Some(interaction_data) => match &interaction_data.name {
-            Some(name) => select_handler(name).handle_application_command(request),
-
-            None => make_error_response(),
-        },
-
+    match request.command_name() {
+        Some(name) => select_handler(&name).handle_application_command(request),
         None => make_error_response(),
     }
 }
@@ -88,29 +83,9 @@ mod tests {
     use super::*;
     use handlers::SIZE;
 
-    fn anonymous_request(
-        r#type: InteractionType,
-        data: Option<InteractionData>,
-    ) -> InteractionRequest {
-        InteractionRequest {
-            r#type: r#type,
-            data: data,
-            member: Some(GuildMember {
-                user: User {
-                    id: "DEBUG_USER_ID".to_string(),
-                },
-                nick: Some("DEBUG_NICKNAME".to_string()),
-            }),
-            message: Some(Message {
-                content: "DEBUG_MESSAGE_CONTENT".to_string(),
-                interaction: None,
-            }),
-        }
-    }
-
     #[test]
     fn test_ping_pong() {
-        let req = anonymous_request(Ping, None);
+        let req = InteractionRequest::ping();
 
         let resp = handle_interaction(&req);
 
@@ -119,12 +94,7 @@ mod tests {
 
     #[test]
     fn test_conway() {
-        let req_data = InteractionData {
-            name: Some("conway".to_string()),
-            custom_id: None,
-        };
-
-        let req = anonymous_request(ApplicationCommand, Some(req_data));
+        let req: InteractionRequest = InteractionRequest::application_command("conway").into();
 
         let resp = handle_interaction(&req);
 
@@ -140,12 +110,7 @@ mod tests {
 
     #[test]
     fn test_deedee() {
-        let req_data = InteractionData {
-            name: Some("deedee".to_string()),
-            custom_id: None,
-        };
-
-        let req = anonymous_request(ApplicationCommand, Some(req_data));
+        let req = InteractionRequest::application_command("deedee").into();
 
         let resp = handle_interaction(&req);
 
@@ -158,45 +123,12 @@ mod tests {
 
     #[test]
     fn shell_game() {
-        let req_data = InteractionData {
-            name: Some("shells".to_string()),
-            custom_id: None,
-        };
-
-        let req = anonymous_request(ApplicationCommand, Some(req_data));
+        let req = InteractionRequest::application_command("shells").into();
 
         let resp = handle_interaction(&req);
 
         let components = resp.message_components();
 
         assert_eq!(components.len(), 5);
-    }
-
-    #[test]
-    fn test_shells_free() {
-        let req_data = InteractionData {
-            name: None,
-            custom_id: Some("free".to_string()),
-        };
-
-        let mut req = anonymous_request(MessageComponent, Some(req_data));
-
-        let interaction = MessageInteraction {
-            name: "shells".to_string(),
-        };
-
-        let message = Message {
-            content: "You have: 3043 :shell:s".to_string(),
-            interaction: Some(interaction),
-        };
-
-        req.message = Some(message);
-
-        let resp = handle_interaction(&req);
-
-        assert_eq!(
-            resp.message_content().unwrap(),
-            "# :woman_elf::magic_wand:\nYou are given 5 free :shell:s.\n*Come again anytime!*\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite :zap:".to_string()
-        );
     }
 }

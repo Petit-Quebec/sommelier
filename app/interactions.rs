@@ -15,18 +15,100 @@ pub struct InteractionRequest {
 }
 
 impl InteractionRequest {
-    pub fn user(&self) -> String {
+    pub fn ping() -> Self {
+        InteractionRequest {
+            r#type: InteractionType::Ping,
+            data: None,
+            member: None,
+            message: None,
+        }
+    }
+
+    pub fn get_user(&self) -> String {
         match &self.member {
             Some(m) => m.user.id.clone(),
             None => "Unknown user".to_string(),
         }
     }
 
-    pub fn message(&self) -> String {
+    pub fn message_content(&self) -> String {
         match &self.message {
             Some(m) => m.content.clone(),
 
             None => "".to_string(),
+        }
+    }
+
+    pub fn command_name(&self) -> Option<String> {
+        match &self.data {
+            Some(data) => match &data {
+                InteractionData::Command(app_data) => Some(app_data.name.clone()),
+                InteractionData::Message(_) => None,
+                InteractionData::Modal(_) => None,
+            },
+            None => None,
+        }
+    }
+
+    pub fn custom_id(&self) -> Option<String> {
+        match &self.data {
+            Some(data) => match &data {
+                InteractionData::Command(_) => None,
+                InteractionData::Message(msg_data) => Some(msg_data.custom_id.clone()),
+                InteractionData::Modal(modal_data) => Some(modal_data.custom_id.clone()),
+            },
+            None => None,
+        }
+    }
+
+    pub fn member(mut self, member: GuildMember) -> Self {
+        self.member = Some(member);
+        self
+    }
+
+    pub fn message(mut self, message: Message) -> Self {
+        self.message = Some(message);
+        self
+    }
+
+    pub fn application_command(name: &str) -> ApplicationCommandData {
+        ApplicationCommandData::new(name)
+    }
+
+    pub fn message_component(custom_id: &str, component_type: u8) -> MessageComponentData {
+        MessageComponentData::new(custom_id, component_type)
+    }
+}
+
+impl From<ApplicationCommandData> for InteractionRequest {
+    fn from(data: ApplicationCommandData) -> Self {
+        InteractionRequest {
+            r#type: InteractionType::ApplicationCommand,
+            data: Some(InteractionData::Command(data)),
+            member: None,
+            message: None,
+        }
+    }
+}
+
+impl From<MessageComponentData> for InteractionRequest {
+    fn from(data: MessageComponentData) -> Self {
+        InteractionRequest {
+            r#type: InteractionType::MessageComponent,
+            data: Some(InteractionData::Message(data)),
+            member: None,
+            message: None,
+        }
+    }
+}
+
+impl From<ModalSubmitData> for InteractionRequest {
+    fn from(data: ModalSubmitData) -> Self {
+        InteractionRequest {
+            r#type: InteractionType::ModalSubmit,
+            data: Some(InteractionData::Modal(data)),
+            member: None,
+            message: None,
         }
     }
 }
@@ -41,15 +123,69 @@ pub enum InteractionType {
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
-pub struct InteractionData {
-    pub name: Option<String>,
-    pub custom_id: Option<String>,
+#[serde(untagged)]
+pub enum InteractionData {
+    Command(ApplicationCommandData),
+    Message(MessageComponentData),
+    Modal(ModalSubmitData),
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct ApplicationCommandData {
+    name: String,
+}
+
+impl ApplicationCommandData {
+    pub fn new(name: &str) -> ApplicationCommandData {
+        ApplicationCommandData {
+            name: name.to_string(),
+        }
+    }
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct MessageComponentData {
+    custom_id: String,
+    component_type: u8,
+}
+
+impl MessageComponentData {
+    pub fn new(custom_id: &str, component_type: u8) -> Self {
+        MessageComponentData {
+            custom_id: custom_id.to_string(),
+            component_type: component_type,
+        }
+    }
+}
+
+#[derive(Deserialize, PartialEq, Debug)]
+pub struct ModalSubmitData {
+    custom_id: String,
+    components: Vec<Component>,
+}
+
+impl ModalSubmitData {
+    pub fn new(custom_id: &str) -> ModalSubmitData {
+        ModalSubmitData {
+            custom_id: custom_id.to_string(),
+            components: Vec::new(),
+        }
+    }
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct GuildMember {
-    pub user: User,
-    pub nick: Option<String>,
+    user: User,
+}
+
+impl GuildMember {
+    pub fn new(user: &str) -> Self {
+        GuildMember {
+            user: User {
+                id: user.to_string(),
+            },
+        }
+    }
 }
 
 #[derive(Deserialize, PartialEq, Debug)]
@@ -235,7 +371,7 @@ impl ActionRow {
     }
 }
 
-#[derive(Serialize, PartialEq, Debug, Clone)]
+#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 #[serde(untagged)]
 pub enum Component {
     Button(Button),
@@ -269,7 +405,7 @@ impl From<TextInput> for Component {
     }
 }
 
-#[derive(Serialize, PartialEq, Debug, Clone)]
+#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 pub struct Button {
     r#type: ComponentType,
     label: Option<String>,
@@ -289,7 +425,7 @@ impl Button {
     }
 }
 
-#[derive(Serialize, PartialEq, Debug, Clone)]
+#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 pub struct TextInput {
     r#type: ComponentType,
     label: String,
@@ -318,13 +454,13 @@ impl TextInput {
     }
 }
 
-#[derive(Serialize_repr, PartialEq, Debug, Clone)]
+#[derive(Deserialize_repr, Serialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
 enum TextInputStyle {
     Short = 1,
 }
 
-#[derive(Serialize_repr, PartialEq, Debug, Clone)]
+#[derive(Deserialize_repr, Serialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
 enum ComponentType {
     ActionRow = 1,
@@ -332,7 +468,7 @@ enum ComponentType {
     TextInput = 4,
 }
 
-#[derive(Serialize_repr, PartialEq, Debug, Clone)]
+#[derive(Deserialize_repr, Serialize_repr, PartialEq, Debug, Clone)]
 #[repr(u8)]
 enum ButtonStyle {
     Primary = 1,
