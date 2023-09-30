@@ -161,11 +161,25 @@ fn build_recall_submit_result(
     state: &InteractionState,
     fields: collections::HashMap<String, String>,
 ) -> String {
-    format!(
-        "inspecting claim of: {} and proof of: {}",
-        fields.get("claim").unwrap(),
-        fields.get("proof").unwrap()
-    ) + &build_stats(state.game_state.bank() + FREE_AMT)
+    let user_claim = fields.get("claim").unwrap();
+    let user_proof = fields.get("proof").unwrap().trim();
+    let expected_proof = proof(&state.user, user_claim);
+    let user_claim = user_claim.parse::<u64>();
+
+    if user_proof == expected_proof && user_claim.is_ok() {
+        let new_bank = user_claim.unwrap();
+
+        format!(
+            "# Circle of Recall
+Your claim is legitimate. You recall, and now have {} :shell:s!\n",
+            new_bank
+        ) + &build_stats(new_bank)
+    } else {
+        format!(
+            "# Circle of Recall
+Your claim failed. You cannot recall anything.\n",
+        ) + &build_stats(state.game_state.bank())
+    }
 }
 
 pub struct ShellsHandler;
@@ -229,10 +243,12 @@ impl Handler for ShellsHandler {
 
                 let content = build_recall_submit_result(&state, req.modal_submit_values());
 
-                InteractionResponse::message()
+                let resp: InteractionResponse = InteractionResponse::message()
                     .content(&content)
                     .components(build_action_row())
-                    .into()
+                    .into();
+
+                resp.edit()
             }
 
             &_ => todo!(),
