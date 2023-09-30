@@ -18,7 +18,7 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
 
         MessageComponent => handle_message_component(request),
 
-        ModalSubmit => handle_ping(request), //handle_modal_submit(request),
+        ModalSubmit => handle_modal_submit(request),
     }
 }
 

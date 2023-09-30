@@ -432,6 +432,7 @@ pub struct TextInput {
     label: Option<String>,
     style: Option<TextInputStyle>,
     custom_id: String,
+    //value: Option<String>,
 }
 
 impl TextInput {
