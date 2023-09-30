@@ -161,9 +161,10 @@ impl MessageComponentData {
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct ModalSubmitData {
     custom_id: String,
-    components: Vec<Component>,
+    components: Vec<ActionRow>,
 }
 
+/*
 impl ModalSubmitData {
     pub fn new(custom_id: &str) -> ModalSubmitData {
         ModalSubmitData {
@@ -171,7 +172,7 @@ impl ModalSubmitData {
             components: Vec::new(),
         }
     }
-}
+}*/
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct GuildMember {
@@ -351,7 +352,7 @@ impl ModalCallbackData {
     }
 }
 
-#[derive(Serialize, PartialEq, Debug)]
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 struct ActionRow {
     r#type: ComponentType,
     components: Vec<Component>,
@@ -428,8 +429,8 @@ impl Button {
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 pub struct TextInput {
     r#type: ComponentType,
-    label: String,
-    style: TextInputStyle,
+    label: Option<String>,
+    style: Option<TextInputStyle>,
     custom_id: String,
 }
 
@@ -437,14 +438,14 @@ impl TextInput {
     pub fn new() -> Self {
         TextInput {
             r#type: ComponentType::TextInput,
-            label: "".to_string(),
-            style: TextInputStyle::Short,
+            label: None,
+            style: Some(TextInputStyle::Short),
             custom_id: "unlabeled text input".to_string(),
         }
     }
 
     pub fn label(mut self, label: &str) -> Self {
-        self.label = label.to_string();
+        self.label = Some(label.to_string());
         self
     }
 
