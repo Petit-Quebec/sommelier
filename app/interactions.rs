@@ -5,6 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use std::collections;
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct InteractionRequest {
@@ -60,13 +61,13 @@ impl InteractionRequest {
         }
     }
 
-    pub fn modal_submit_values(&self) -> Vec<(String, String)> {
+    pub fn modal_submit_values(&self) -> collections::HashMap<String, String> {
         match &self.data {
             Some(data) => match &data {
                 InteractionData::Modal(modal_data) => modal_data.values(),
-                _ => vec![],
+                _ => collections::HashMap::new(),
             },
-            _ => vec![],
+            _ => collections::HashMap::new(),
         }
     }
 
@@ -174,7 +175,7 @@ pub struct ModalSubmitData {
 }
 
 impl ModalSubmitData {
-    pub fn values(&self) -> Vec<(String, String)> {
+    pub fn values(&self) -> collections::HashMap<String, String> {
         self.components
             .iter()
             .map(|row| row.component_value())

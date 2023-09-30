@@ -155,14 +155,6 @@ fn build_brag_result(state: &InteractionState) -> String {
     ) + &format!("### Proof: *{}*", translate_proof(&hash))
 }
 
-fn build_recall_initiation(state: &InteractionState) -> String {
-    format!("# :woman_elf::leaves: Circle of Recall
-
-Provide the number of :shell:s you are claiming and the **Sselvish** proof of your past achievement. Only then can you recall your past :shell:s.
-
-*By recalling your past achievement, you are leaving behind your current pool of {} :shell:s! If you're okay with that, we can proceed.*", state.game_state.bank())
-}
-
 pub struct ShellsHandler;
 
 impl Handler for ShellsHandler {
@@ -221,6 +213,8 @@ impl Handler for ShellsHandler {
     }
 
     fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
+        let id = req.custom_id().unwrap();
+
         let x: Vec<String> = req
             .modal_submit_values()
             .iter()
