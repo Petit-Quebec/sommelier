@@ -17,6 +17,8 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
         ApplicationCommand => handle_application_command(request),
 
         MessageComponent => handle_message_component(request),
+
+        ModalSubmit => handle_modal_submit(request),
     }
 }
 
@@ -59,6 +61,19 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
         .name;
 
     select_handler(name).handle_message_component(request)
+}
+
+fn handle_modal_submit(request: &InteractionRequest) -> InteractionResponse {
+    let name = &request
+        .message
+        .as_ref()
+        .unwrap()
+        .interaction
+        .as_ref()
+        .unwrap()
+        .name;
+
+    select_handler(name).handle_modal_submit(request)
 }
 
 fn make_error_response() -> InteractionResponse {

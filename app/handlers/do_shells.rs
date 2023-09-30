@@ -39,7 +39,6 @@ fn build_action_row() -> Vec<Component> {
 fn build_recall_fields() -> Vec<Component> {
     let claim = Component::text_input().label("claim").id("claim").into();
     let proof = Component::text_input().label("proof").id("proof").into();
-
     vec![claim, proof]
 }
 
@@ -196,9 +195,14 @@ impl Handler for ShellsHandler {
                 .into(),
 
             "recall" => InteractionResponse::modal()
-                .id("recall")
-                .title(":leaves: Circle of Recall :leaves:")
+                .id("submit_recall")
+                .title("Circle of Recall")
                 .components(build_recall_fields())
+                .into(),
+
+            "submit_recall" => InteractionResponse::message()
+                .content("recall submitted!")
+                .components(build_action_row())
                 .into(),
 
             "rules" => InteractionResponse::message()

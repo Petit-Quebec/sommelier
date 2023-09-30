@@ -16,4 +16,8 @@ pub trait Handler {
     fn handle_message_component(&self, data: &InteractionRequest) -> InteractionResponse {
         Self::handle_application_command(self, data)
     }
+
+    fn handle_modal_submit(&self, data: &InteractionRequest) -> InteractionResponse {
+        Self::handle_application_command(self, data)
+    }
 }
