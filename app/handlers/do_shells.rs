@@ -220,9 +220,15 @@ impl Handler for ShellsHandler {
         }
     }
 
-    fn handle_modal_submit(&self, _: &InteractionRequest) -> InteractionResponse {
+    fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
+        let x: Vec<String> = req
+            .modal_submit_values()
+            .iter()
+            .map(|(x, y)| x.clone() + &y)
+            .collect();
+
         InteractionResponse::message()
-            .content(&(build_rules_message() + "\n" + &build_stats(0)))
+            .content(&x.join(", "))
             .components(build_action_row())
             .into()
     }

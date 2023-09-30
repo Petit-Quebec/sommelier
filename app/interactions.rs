@@ -43,8 +43,7 @@ impl InteractionRequest {
         match &self.data {
             Some(data) => match &data {
                 InteractionData::Command(app_data) => Some(app_data.name.clone()),
-                InteractionData::Message(_) => None,
-                InteractionData::Modal(_) => None,
+                _ => None,
             },
             None => None,
         }
@@ -58,6 +57,16 @@ impl InteractionRequest {
                 InteractionData::Modal(modal_data) => Some(modal_data.custom_id.clone()),
             },
             None => None,
+        }
+    }
+
+    pub fn modal_submit_values(&self) -> Vec<(String, String)> {
+        match &self.data {
+            Some(data) => match &data {
+                InteractionData::Modal(modal_data) => modal_data.values(),
+                _ => vec![],
+            },
+            _ => vec![],
         }
     }
 
@@ -164,15 +173,16 @@ pub struct ModalSubmitData {
     components: Vec<ActionRow>,
 }
 
-/*
 impl ModalSubmitData {
-    pub fn new(custom_id: &str) -> ModalSubmitData {
-        ModalSubmitData {
-            custom_id: custom_id.to_string(),
-            components: Vec::new(),
-        }
+    pub fn values(&self) -> Vec<(String, String)> {
+        self.components
+            .iter()
+            .map(|row| row.component_value())
+            .filter(|v| v.is_some())
+            .map(|v| v.unwrap())
+            .collect()
     }
-}*/
+}
 
 #[derive(Deserialize, PartialEq, Debug)]
 pub struct GuildMember {
@@ -262,7 +272,7 @@ impl InteractionResponse {
                     m.components[0].components.clone()
                 }
             }
-            _ => panic!(),
+            _ => vec![],
         }
     }
 }
@@ -370,6 +380,13 @@ impl ActionRow {
         self.components = components;
         self
     }
+
+    pub fn component_value(&self) -> Option<(String, String)> {
+        match &self.components[0] {
+            Component::Text(text) => text.value(),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
@@ -391,6 +408,13 @@ impl Component {
 
     pub fn text_input() -> TextInput {
         TextInput::new()
+    }
+
+    pub fn value(&self) -> Option<(String, String)> {
+        match self {
+            Component::Button(_) => None,
+            Component::Text(text) => text.value(),
+        }
     }
 }
 
@@ -432,7 +456,7 @@ pub struct TextInput {
     label: Option<String>,
     style: Option<TextInputStyle>,
     custom_id: String,
-    //value: Option<String>,
+    value: Option<String>,
 }
 
 impl TextInput {
@@ -442,6 +466,7 @@ impl TextInput {
             label: None,
             style: Some(TextInputStyle::Short),
             custom_id: "unlabeled text input".to_string(),
+            value: None,
         }
     }
 
@@ -453,6 +478,12 @@ impl TextInput {
     pub fn id(mut self, id: &str) -> Self {
         self.custom_id = id.to_string();
         self
+    }
+
+    pub fn value(&self) -> Option<(String, String)> {
+        let s = self.custom_id.clone();
+        let v = self.value.as_ref()?.clone();
+        Some((s, v))
     }
 }
 
