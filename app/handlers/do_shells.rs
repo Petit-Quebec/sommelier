@@ -4,13 +4,13 @@
 
 mod state;
 
-use state::InteractionState;
-
 use crate::handlers::Handler;
 use crate::{Component, InteractionRequest, InteractionResponse};
 use hex::FromHex;
 use rand::{thread_rng, Rng};
 use sha256::digest;
+use state::InteractionState;
+use std::collections;
 
 const SALT: &str = env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
@@ -138,13 +138,15 @@ fn honorific(amt: u64) -> String {
     .to_string()
 }
 
+fn proof(id: &str, amt: &str) -> String {
+    let s = SALT.to_string() + id + amt;
+    let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
+    translate_proof(&hash)
+}
+
 fn build_brag_result(state: &InteractionState) -> String {
     let id = &state.user;
     let bank = state.game_state.bank();
-
-    let s = SALT.to_string() + &id + &bank.to_string();
-
-    let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
 
     format!(
         "## <@{}> has {} :shell:s!\n## <@{}> is {}\n",
@@ -152,7 +154,18 @@ fn build_brag_result(state: &InteractionState) -> String {
         bank,
         id,
         honorific(bank)
-    ) + &format!("### Proof: *{}*", translate_proof(&hash))
+    ) + &format!("### Proof: *{}*", proof(id, &bank.to_string()))
+}
+
+fn build_recall_submit_result(
+    state: &InteractionState,
+    fields: collections::HashMap<String, String>,
+) -> String {
+    format!(
+        "inspecting claim of: {} and proof of: {}",
+        fields.get("claim").unwrap(),
+        fields.get("proof").unwrap()
+    ) + &build_stats(state.game_state.bank() + FREE_AMT)
 }
 
 pub struct ShellsHandler;
@@ -192,11 +205,6 @@ impl Handler for ShellsHandler {
                 .components(build_recall_fields())
                 .into(),
 
-            "submit_recall" => InteractionResponse::message()
-                .content("recall submitted!")
-                .components(build_action_row())
-                .into(),
-
             "rules" => InteractionResponse::message()
                 .content(&(build_rules_message() + "\n" + &state.game_state.fmt()))
                 .components(build_action_row())
@@ -215,16 +223,20 @@ impl Handler for ShellsHandler {
     fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
         let id = req.custom_id().unwrap();
 
-        let x: Vec<String> = req
-            .modal_submit_values()
-            .iter()
-            .map(|(x, y)| x.clone() + &y)
-            .collect();
+        match id.as_str() {
+            "submit_recall" => {
+                let state: InteractionState = req.into();
 
-        InteractionResponse::message()
-            .content(&x.join(", "))
-            .components(build_action_row())
-            .into()
+                let content = build_recall_submit_result(&state, req.modal_submit_values());
+
+                InteractionResponse::message()
+                    .content(&content)
+                    .components(build_action_row())
+                    .into()
+            }
+
+            &_ => todo!(),
+        }
     }
 }
 
