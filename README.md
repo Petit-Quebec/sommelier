@@ -63,6 +63,7 @@ You will also need the following environment variables:
 - `SOMMELIER_APPLICATION_ID`
 - `SOMMELIER_BOT_TOKEN`
 - `SOMMELIER_LAMBDA_EXECUTION_ROLE`
+- `SOMMELIER_GAMBLING_SALT`
 
 The first three of these can be found in the Discord Developer Portal. `SOMMELIER_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. 
 
