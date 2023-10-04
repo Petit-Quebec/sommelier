@@ -6,6 +6,14 @@ A Discord bot written in Rust, to be deployed in a matching "Kitchen" server. Th
 
 One of the most immediately noticeable features of Rust is the Rust compiler, which will be invoked whenever you run `cargo build` or `cargo test`. This compiler will provide strong guidance on how to structure your code, in a way that may be frustrating at first. As some pretentious [rustaceans](https://rustaceans.org/) might say, this is just the normal "conversation with the compiler" to teach you about Rust's typing system. Do not be alarmed if the compiler yells at you, very often. 
 
+## Environment Setup
+Before you run any part of this app, you will need to set the following environment variable:
+- `SOMMELIER_GAMBLING_SALT`
+
+This variable is a secret key that will randomize an aspect of gambling in the app.
+
+The way you do this will depend on your terminal. A way of doing this in VS Code can be found [here](https://stackoverflow.com/questions/48595446/is-there-any-way-to-set-environment-variables-in-visual-studio-code).
+
 ## Cargo
 [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) is the primary build/project/package manager for Rust. Useful Cargo commands:
 - `cargo build`, to build the project
@@ -65,7 +73,7 @@ You will also need the following environment variables:
 - `SOMMELIER_LAMBDA_EXECUTION_ROLE`
 - `SOMMELIER_GAMBLING_SALT`
 
-The first three of these can be found in the Discord Developer Portal. `SOMMELIER_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. 
+The first three of these can be found in the Discord Developer Portal. `SOMMELIER_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. `SOMMELIER_GAMBLING_SALT` is the variable required for the app itself.
 
 ## Deploying
 To deploy the project, run the `deploy.sh` scripts, which builds the project, and then deploys it to a lambda named `sommelier`. 
