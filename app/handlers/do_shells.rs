@@ -12,7 +12,7 @@ use sha256::digest;
 use state::InteractionState;
 use std::collections;
 
-const SALT: &str = env!("SOMMELIER_GAMBLING_SALT");
+const SALT: Option<&str> = option_env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
 const BANK_PREFIX: &str = "You have: ";
 const BANK_SUFFIX: &str = " :shell:s";
@@ -139,7 +139,7 @@ fn honorific(amt: u64) -> String {
 }
 
 fn proof(id: &str, amt: &str) -> String {
-    let s = SALT.to_string() + id + amt;
+    let s = SALT.unwrap_or("SOME_DEFAULT_VALUE").to_string() + id + amt;
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
     translate_proof(&hash)
 }

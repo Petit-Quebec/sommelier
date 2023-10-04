@@ -6,14 +6,6 @@ A Discord bot written in Rust, to be deployed in a matching "Kitchen" server. Th
 
 One of the most immediately noticeable features of Rust is the Rust compiler, which will be invoked whenever you run `cargo build` or `cargo test`. This compiler will provide strong guidance on how to structure your code, in a way that may be frustrating at first. As some pretentious [rustaceans](https://rustaceans.org/) might say, this is just the normal "conversation with the compiler" to teach you about Rust's typing system. Do not be alarmed if the compiler yells at you, very often. 
 
-## Environment Setup
-Before you run any part of this app, you will need to set the following environment variable:
-- `SOMMELIER_GAMBLING_SALT`
-
-This variable is a secret key that will randomize an aspect of gambling in the app.
-
-The way you do this will depend on your terminal. A way of doing this in VS Code can be found [here](https://stackoverflow.com/questions/48595446/is-there-any-way-to-set-environment-variables-in-visual-studio-code).
-
 ## Cargo
 [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) is the primary build/project/package manager for Rust. Useful Cargo commands:
 - `cargo build`, to build the project
@@ -22,6 +14,14 @@ The way you do this will depend on your terminal. A way of doing this in VS Code
 - `cargo help`, to get more cargo commands.
 
 To develop on this app, you will need Cargo >= 1.71.0.
+
+## Environment Setup
+There are no required environment variables for the (non-web) proejct. If you want control over how gambling hashing is determined, you will need to set the following environment variable:
+- `SOMMELIER_GAMBLING_SALT`
+
+This variable is a secret key that will randomize an aspect of gambling in the app.
+
+The way you do this will depend on your terminal. A way of doing this in VS Code can be found [here](https://stackoverflow.com/questions/48595446/is-there-any-way-to-set-environment-variables-in-visual-studio-code).
 
 # If you want to write code...
 
