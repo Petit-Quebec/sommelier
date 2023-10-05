@@ -2,12 +2,14 @@
  * Implementation of "gamble" command.
  */
 
+mod interaction_wrappers;
 mod messages;
 mod sselvish;
 mod state;
 
 use crate::handlers::Handler;
-use crate::{Component, InteractionRequest, InteractionResponse};
+use crate::{InteractionRequest, InteractionResponse};
+use interaction_wrappers::{loud_message, plain_message, quiet_message, recall_modal};
 use rand::{thread_rng, Rng};
 use state::InteractionState;
 use std::collections;
@@ -35,7 +37,7 @@ impl Handler for ShellsHandler {
 
             "brag" => loud_message(&brag_result(state)),
 
-            "recall" => modal("submit_recall", "Circle of Recall", build_recall_fields()),
+            "recall" => recall_modal("submit_recall", "Circle of Recall"),
 
             "rules" => quiet_message(&rules_result(state)),
 
@@ -58,12 +60,7 @@ impl Handler for ShellsHandler {
 
                 let content = recall_submit_result(state, req.modal_submit_values());
 
-                let resp: InteractionResponse = InteractionResponse::message()
-                    .content(&content)
-                    .components(build_action_row())
-                    .into();
-
-                resp.edit()
+                quiet_message(&content)
             }
 
             &_ => todo!(),
@@ -116,51 +113,6 @@ fn recall_submit_result(
 
 fn rules_result(state: InteractionState) -> String {
     messages::rules_message(&state)
-}
-
-fn plain_message(msg: &str) -> InteractionResponse {
-    InteractionResponse::message()
-        .content(msg)
-        .components(build_action_row())
-        .into()
-}
-
-fn quiet_message(msg: &str) -> InteractionResponse {
-    plain_message(msg).edit()
-}
-
-fn loud_message(msg: &str) -> InteractionResponse {
-    InteractionResponse::message().content(msg).shout().into()
-}
-
-fn modal(id: &str, title: &str, comps: Vec<Component>) -> InteractionResponse {
-    InteractionResponse::modal()
-        .id(id)
-        .title(title)
-        .components(comps)
-        .into()
-}
-
-fn build_action_row() -> Vec<Component> {
-    let roll_button = Component::button().label("roll").id("roll").into();
-    let free_button = Component::button().label("free").id("free").into();
-    let brag_button = Component::button().label("brag").id("brag").into();
-    let recall_button = Component::button().label("recall").id("recall").into();
-    let rules_button = Component::button().label("rules").id("rules").into();
-
-    vec![
-        roll_button,
-        free_button,
-        brag_button,
-        recall_button,
-        rules_button,
-    ]
-}
-
-fn build_recall_fields() -> Vec<Component> {
-    let claim = Component::text_input().label("claim").id("claim").into();
-    let proof = Component::text_input().label("proof").id("proof").into();
-    vec![claim, proof]
 }
 
 #[cfg(test)]
