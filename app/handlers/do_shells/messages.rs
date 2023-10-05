@@ -97,3 +97,32 @@ Your claim fails! You cannot recall anything.
         proof
     ) + &build_stats(&state)
 }
+
+pub fn brag_message(proof: &str, state: InteractionState) -> String {
+    let user = &state.user;
+
+    let bank = state.game_state.bank;
+
+    format!(
+        r#"## <@{}> has {} :shell:s!
+
+## <@{}> is {}!
+
+### Proof: *{}*"#,
+        user,
+        bank,
+        user,
+        honorific(bank),
+        proof
+    )
+}
+
+fn honorific(bank: u64) -> String {
+    match bank {
+        0 => "a :monkey: Blatant Bonobo :monkey:",
+        1..=9 => "a :cucumber: Cool Cucumber :cucumber:",
+        10..=49 => "a :cut_of_meat: Sizzlin' Steak :cut_of_meat:",
+        50.. => "an :elf: Elegant Elf :elf:",
+    }
+    .to_string()
+}

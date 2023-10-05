@@ -90,16 +90,6 @@ fn translate_proof(hash: &[u8]) -> String {
     proof.trim().to_string()
 }
 
-fn honorific(amt: u64) -> String {
-    match amt {
-        0 => "a :monkey: Blatant Bonobo :monkey:",
-        1..=9 => "a :cucumber: Cool Cucumber :cucumber:",
-        10..=49 => "a :cut_of_meat: Sizzlin' Steak :cut_of_meat:",
-        50.. => "an :elf: Elegant Elf :elf:",
-    }
-    .to_string()
-}
-
 fn proof(id: &str, amt: &str) -> String {
     let s = SALT.unwrap_or("SOME_DEFAULT_VALUE").to_string() + id + amt;
     let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
@@ -107,16 +97,8 @@ fn proof(id: &str, amt: &str) -> String {
 }
 
 fn build_brag_result(state: InteractionState) -> String {
-    let id = &state.user;
-    let bank = state.game_state.bank;
-
-    format!(
-        "## <@{}> has {} :shell:s!\n## <@{}> is {}\n",
-        id,
-        bank,
-        id,
-        honorific(bank)
-    ) + &format!("### Proof: *{}*", proof(id, &bank.to_string()))
+    let proof = proof(&state.user, &state.game_state.bank.to_string());
+    messages::brag_message(&proof, state)
 }
 
 fn build_recall_submit_result(
@@ -270,7 +252,7 @@ mod tests {
 
         assert_eq!(
             resp.message_content().unwrap(),
-            "# :woman_elf::beach:\n\nYou gain 5 :shell:s.\n\n# Your Stats\nYou have: 3048 :shell:s\nYou are betting: 0 :shell:s\nYou have: 0 :star2:s\n".to_string()
+            "# :beach:\n\nYou find 5 :shell:s.\n\n## Your Stats\nYou have: 3048 :shell:s\nYou are betting: 0 :shell:s\nYou have: 0 :star2:s\n".to_string()
         );
     }
 }
