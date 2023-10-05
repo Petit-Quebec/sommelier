@@ -182,6 +182,29 @@ Your claim failed. You cannot recall anything.\n",
     }
 }
 
+fn quiet_message(msg: &str) -> InteractionResponse {
+    let m: InteractionResponse = InteractionResponse::message()
+        .content(msg)
+        .components(build_action_row())
+        .into();
+    m.edit()
+}
+
+fn loud_message(msg: &str) -> InteractionResponse {
+    InteractionResponse::message()
+        .content(msg)
+        .components(build_action_row())
+        .into()
+}
+
+fn modal(id: &str, title: &str, comps: Vec<Component>) -> InteractionResponse {
+    InteractionResponse::modal()
+        .id("submit_recall")
+        .title("Circle of Recall")
+        .components(build_recall_fields())
+        .into()
+}
+
 pub struct ShellsHandler;
 
 impl Handler for ShellsHandler {
@@ -198,33 +221,17 @@ impl Handler for ShellsHandler {
         let id = req.custom_id().unwrap();
 
         let res: InteractionResponse = match id.as_str() {
-            "roll" => InteractionResponse::message()
-                .content(&build_roll_result(&state))
-                .components(build_action_row())
-                .into(),
+            "roll" => quiet_message(&build_roll_result(&state)),
 
-            "free" => InteractionResponse::message()
-                .content(&build_free_result(&state))
-                .components(build_action_row())
-                .into(),
+            "free" => quiet_message(&build_free_result(&state)),
 
-            "brag" => InteractionResponse::message()
-                .content(&build_brag_result(&state))
-                .shout()
-                .into(),
+            "brag" => loud_message(&build_brag_result(&state)),
 
-            "recall" => InteractionResponse::modal()
-                .id("submit_recall")
-                .title("Circle of Recall")
-                .components(build_recall_fields())
-                .into(),
+            "recall" => modal("submit_recall", "Circle of Recall", build_recall_fields()),
 
-            "rules" => InteractionResponse::message()
-                .content(&(build_rules_message() + "\n" + &state.game_state.fmt()))
-                .components(build_action_row())
-                .into(),
+            "rules" => quiet_message(&(build_rules_message() + "\n" + &state.game_state.fmt())),
 
-            &_ => todo!(),
+            &_ => panic!("unknown message command"),
         };
 
         match id.as_str() {
