@@ -8,7 +8,6 @@ pub fn welcome_message(state: InteractionState) -> String {
     r#"# :woman_elf::shell: Shell Game :shell:
 
 Welcome to the shell game!
-
 "#
     .to_string()
         + &build_stats(&state)
@@ -26,7 +25,6 @@ Additionally, whenever you roll, you have a chance to gain :zap:. The more of yo
 **Brag** will consume :zap: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish.
 
 **Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!
-
 "#.to_string()
  + &build_stats(&state)
 }
@@ -40,7 +38,6 @@ You rolled on {} :shell:s...
 for a **{}x** multiplier.
 
 You **won** {} :shell:s!
-
 "#,
         bet,
         roll,
@@ -50,7 +47,6 @@ You **won** {} :shell:s!
 
 pub fn roll_failure_message(state: InteractionState) -> String {
     r#"You can't roll on more :shell:s than you have!
-
 "#
     .to_string()
         + &build_stats(&state)
@@ -58,7 +54,6 @@ pub fn roll_failure_message(state: InteractionState) -> String {
 
 pub fn free_message(gain: Option<u64>, insp: Option<u64>, state: InteractionState) -> String {
     r#"# :beach:
-
 "#
     .to_string()
         + &match gain {
@@ -79,7 +74,6 @@ pub fn recall_success_message(proof: &str, state: InteractionState) -> String {
 You utter your **Sselvish** proof: *{}*. 
 
 Your claim is legitimate! You recall {} :shell:s!
-
 "#,
         proof, state.game_state.bank
     ) + &build_stats(&state)
@@ -92,7 +86,6 @@ pub fn recall_failure_message(proof: &str, state: InteractionState) -> String {
 You utter your **Sselvish** proof: *{}*. 
 
 Your claim fails! You cannot recall anything.
-
 "#,
         proof
     ) + &build_stats(&state)

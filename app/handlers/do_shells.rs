@@ -131,10 +131,7 @@ fn quiet_message(msg: &str) -> InteractionResponse {
 }
 
 fn loud_message(msg: &str) -> InteractionResponse {
-    InteractionResponse::message()
-        .content(msg)
-        .components(build_action_row())
-        .into()
+    InteractionResponse::message().content(msg).shout().into()
 }
 
 fn modal(id: &str, title: &str, comps: Vec<Component>) -> InteractionResponse {
