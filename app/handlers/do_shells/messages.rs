@@ -109,11 +109,9 @@ pub fn rules_message(state: &InteractionState) -> String {
 
 **Roll** to bet your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back, with equal probability.
 
-Additionally, whenever you roll, you have a chance to gain :zap:. The more of your saved :shell:s you roll on, the higher the chance that you'll gain :zap:.
+**Free** will give you a small number of :shell:s for free! Or you could get a :star2:...
 
-**Free** will give you a small number of :shell:s for free! No charge at all.
-
-**Brag** will consume :zap: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish.
+**Brag** will consume a :star2: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish.
 
 **Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!
 "#.to_string()

@@ -14,14 +14,14 @@ use rand::{thread_rng, Rng};
 use state::InteractionState;
 use std::collections;
 
-const FREE_AMT: u64 = 5;
+const FREE_SHELLS_AMT: u64 = 5;
+const FREE_INSP_AMT: u64 = 1;
 
 pub struct ShellsHandler;
 
 impl Handler for ShellsHandler {
     fn handle_application_command(&self, req: &InteractionRequest) -> InteractionResponse {
         let state: InteractionState = req.into();
-
         plain_message(&messages::welcome_message(&state))
     }
 
@@ -32,15 +32,10 @@ impl Handler for ShellsHandler {
 
         let res: InteractionResponse = match id.as_str() {
             "roll" => quiet_message(&roll_result(state)),
-
             "free" => quiet_message(&free_result(state)),
-
             "brag" => loud_message(&brag_result(state)),
-
             "recall" => recall_modal("submit_recall", "Circle of Recall"),
-
             "rules" => quiet_message(&rules_result(state)),
-
             &_ => panic!("unknown message command"),
         };
 
@@ -57,9 +52,7 @@ impl Handler for ShellsHandler {
         match id.as_str() {
             "submit_recall" => {
                 let state: InteractionState = req.into();
-
                 let content = recall_submit_result(state, req.modal_submit_values());
-
                 quiet_message(&content)
             }
 
@@ -84,8 +77,18 @@ fn roll_result(mut state: InteractionState) -> String {
 }
 
 fn free_result(mut state: InteractionState) -> String {
-    state.game_state.bank += FREE_AMT;
-    messages::free_message(Some(FREE_AMT), None, &state)
+    let mut rng = thread_rng();
+    let roll: u8 = rng.gen_range(0, 255);
+    match roll {
+        0..=127 => {
+            state.game_state.insp += FREE_INSP_AMT;
+            messages::free_message(None, Some(FREE_INSP_AMT), &state)
+        }
+        128.. => {
+            state.game_state.bank += FREE_SHELLS_AMT;
+            messages::free_message(Some(FREE_SHELLS_AMT), None, &state)
+        }
+    }
 }
 
 fn brag_result(state: InteractionState) -> String {
@@ -139,7 +142,7 @@ mod tests {
 
         let resp = ShellsHandler.handle_message_component(&req);
 
-        let content = resp.message_content().unwrap();
+        let content = &resp.message_content().unwrap();
 
         let state: GameState = content.into();
 
@@ -161,11 +164,14 @@ mod tests {
 
         let req = req.message(message).member(GuildMember::new("some user"));
 
-        let resp = ShellsHandler.handle_message_component(&req);
+        let resp_content = &ShellsHandler
+            .handle_message_component(&req)
+            .message_content()
+            .unwrap();
 
-        assert_eq!(
-            resp.message_content().unwrap(),
-            "# :beach:\nYou find 5 :shell:s.\n## Your Stats\nYou have: 3048 :shell:s\nYou are betting: 0 :shell:s\nYou have: 0 :star2:s\n".to_string()
-        );
+        let new: GameState = resp_content.into();
+
+        assert!(new.bank == 3048 || new.insp == 1);
+        assert!(new.bank == 3043 || new.insp == 0);
     }
 }

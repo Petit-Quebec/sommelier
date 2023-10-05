@@ -18,7 +18,7 @@ impl From<&InteractionRequest> for InteractionState {
     fn from(req: &InteractionRequest) -> Self {
         InteractionState {
             user: req.get_user(),
-            game_state: req.message_content().into(),
+            game_state: (&req.message_content()).into(),
         }
     }
 }
@@ -26,7 +26,7 @@ impl From<&InteractionRequest> for InteractionState {
 pub struct GameState {
     pub bet: u64,
     pub bank: u64,
-    pub inspiration: u64,
+    pub insp: u64,
 }
 
 impl fmt::Display for GameState {
@@ -36,7 +36,7 @@ impl fmt::Display for GameState {
             "{}\n{}\n{}\n",
             fmt_stat(BANK_PREFIX, self.bank, BANK_SUFFIX),
             fmt_stat(BET_PREFIX, self.bet, BET_SUFFIX),
-            fmt_stat(INSP_PREFIX, self.inspiration, INSP_SUFFIX)
+            fmt_stat(INSP_PREFIX, self.insp, INSP_SUFFIX)
         )
     }
 }
@@ -45,16 +45,16 @@ fn fmt_stat<T: fmt::Display>(prefix: &str, n: T, suffix: &str) -> String {
     vec![prefix, &n.to_string(), &suffix].join(" ")
 }
 
-impl From<String> for GameState {
-    fn from(msg: String) -> Self {
-        let bank = recognize_stat(&msg, BANK_PREFIX, BANK_SUFFIX).unwrap_or(0);
-        let bet = recognize_stat(&msg, BET_PREFIX, BET_SUFFIX).unwrap_or(0);
-        let insp = recognize_stat(&msg, INSP_PREFIX, INSP_SUFFIX).unwrap_or(0);
+impl From<&String> for GameState {
+    fn from(msg: &String) -> Self {
+        let bank = recognize_stat(msg, BANK_PREFIX, BANK_SUFFIX).unwrap_or(0);
+        let bet = recognize_stat(msg, BET_PREFIX, BET_SUFFIX).unwrap_or(0);
+        let insp = recognize_stat(msg, INSP_PREFIX, INSP_SUFFIX).unwrap_or(0);
 
         GameState {
             bet: bet,
             bank: bank,
-            inspiration: insp,
+            insp: insp,
         }
     }
 }
