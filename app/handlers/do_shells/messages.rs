@@ -57,11 +57,11 @@ pub fn free_message(gain: Option<u64>, insp: Option<u64>, state: InteractionStat
 "#
     .to_string()
         + &match gain {
-            Some(g) => "You find ".to_string() + &g.to_string() + " :shell:s.\n\n",
+            Some(g) => "You find ".to_string() + &g.to_string() + " :shell:s.\n",
             None => "".to_string(),
         }
         + &match insp {
-            Some(i) => "You gain ".to_string() + &i.to_string() + " :star2:s.\n\n",
+            Some(i) => "You gain ".to_string() + &i.to_string() + " :star2:s.\n",
             None => "".to_string(),
         }
         + &build_stats(&state)

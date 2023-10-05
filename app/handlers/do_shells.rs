@@ -3,19 +3,16 @@
  */
 
 mod messages;
+mod sselvish;
 mod state;
 
 use crate::handlers::Handler;
 use crate::{Component, InteractionRequest, InteractionResponse};
-use hex::FromHex;
 use rand::{thread_rng, Rng};
-use sha256::digest;
 use state::InteractionState;
 use std::collections;
 
-const SALT: Option<&str> = option_env!("SOMMELIER_GAMBLING_SALT");
 const FREE_AMT: u64 = 5;
-const PROOF_LENGTH: usize = 12;
 
 fn build_action_row() -> Vec<Component> {
     let roll_button = Component::button().label("roll").id("roll").into();
@@ -59,45 +56,8 @@ fn build_free_result(mut state: InteractionState) -> String {
     messages::free_message(Some(FREE_AMT), None, state)
 }
 
-fn translate_proof(hash: &[u8]) -> String {
-    let mut proof = "".to_string();
-
-    for i in 1..=PROOF_LENGTH {
-        let n = hash[i];
-
-        let prefix = n & 7;
-        let space = n >> 3 & 1;
-
-        proof += &match prefix {
-            0 => "ba",
-            1 => "la",
-            2 => "ha",
-            3 => "no",
-            4 => "re",
-            5 => "na",
-            6 => "ne",
-            _ => "sha",
-        }
-        .to_string();
-
-        proof += &match space {
-            0 => " ",
-            _ => "",
-        }
-        .to_string();
-    }
-
-    proof.trim().to_string()
-}
-
-fn proof(id: &str, amt: &str) -> String {
-    let s = SALT.unwrap_or("SOME_DEFAULT_VALUE").to_string() + id + amt;
-    let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
-    translate_proof(&hash)
-}
-
 fn build_brag_result(state: InteractionState) -> String {
-    let proof = proof(&state.user, &state.game_state.bank.to_string());
+    let proof = sselvish::proof(&state.user, &state.game_state.bank.to_string());
     messages::brag_message(&proof, state)
 }
 
@@ -107,7 +67,7 @@ fn build_recall_submit_result(
 ) -> String {
     let user_claim = fields.get("claim").unwrap();
     let user_proof = fields.get("proof").unwrap().trim();
-    let expected_proof = proof(&state.user, user_claim);
+    let expected_proof = sselvish::proof(&state.user, user_claim);
     let user_claim = user_claim.parse::<u64>();
 
     if user_proof == expected_proof && user_claim.is_ok() {
@@ -249,7 +209,7 @@ mod tests {
 
         assert_eq!(
             resp.message_content().unwrap(),
-            "# :beach:\n\nYou find 5 :shell:s.\n\n## Your Stats\nYou have: 3048 :shell:s\nYou are betting: 0 :shell:s\nYou have: 0 :star2:s\n".to_string()
+            "# :beach:\nYou find 5 :shell:s.\n## Your Stats\nYou have: 3048 :shell:s\nYou are betting: 0 :shell:s\nYou have: 0 :star2:s\n".to_string()
         );
     }
 }
