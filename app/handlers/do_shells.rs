@@ -2,6 +2,7 @@
  * Implementation of "gamble" command.
  */
 
+mod messages;
 mod state;
 
 use crate::handlers::Handler;
@@ -38,54 +39,24 @@ fn build_recall_fields() -> Vec<Component> {
     vec![claim, proof]
 }
 
-fn build_rules_message(state: InteractionState) -> String {
-    "# :woman_elf::shell: Shell Game :shell:
-
-**Roll** to bet your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back, with equal probability.
-
-Additionally, whenever you roll, you have a chance to gain :zap:. The more of your saved :shell:s you roll on, the higher the chance that you'll gain :zap:.
-
-**Free** will give you a small number of :shell:s for free! No charge at all.
-
-**Brag** will consume :zap: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish. 
-
-**Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!".to_string()
- + &build_stats(&state)
-}
-
-fn build_stats(state: &InteractionState) -> String {
-    "# Your Stats\n".to_string() + &state.game_state.to_string()
-}
-
 fn build_roll_result(mut state: InteractionState) -> String {
     let bet = state.game_state.bet;
     let bank = state.game_state.bank;
 
     if bet > bank {
-        "You can't roll on more :shell:s than you have!\n".to_string() + &build_stats(&state)
+        messages::roll_failure_message(state)
     } else {
         let mut rng = thread_rng();
         let roll: u64 = rng.gen_range(0, 4);
         let winnings = roll * bet;
         state.game_state.bank = bank - bet + winnings;
-        format!(
-            "# :woman_elf::slot_machine:
-You rolled on {} :shell:s...
-for a **{}x** multiplier.
-You **won** {} :shell:s!\n",
-            bet, roll, winnings
-        ) + &build_stats(&state)
+        messages::roll_success_message(roll, bet, state)
     }
 }
 
 fn build_free_result(mut state: InteractionState) -> String {
     state.game_state.bank += FREE_AMT;
-    format!(
-        "# :woman_elf::magic_wand:
-You are given {} free :shell:s.
-*Come again anytime!*\n",
-        FREE_AMT
-    ) + &build_stats(&state)
+    messages::free_message(Some(FREE_AMT), None, state)
 }
 
 fn translate_proof(hash: &[u8]) -> String {
@@ -160,25 +131,21 @@ fn build_recall_submit_result(
     if user_proof == expected_proof && user_claim.is_ok() {
         state.game_state.bank = user_claim.unwrap();
 
-        format!(
-            "# Circle of Recall
-Your claim is legitimate. You recall, and now have {} :shell:s!\n",
-            state.game_state.bank
-        ) + &build_stats(&state)
+        messages::recall_success_message(user_proof, state)
     } else {
-        format!(
-            "# Circle of Recall
-Your claim failed. You cannot recall anything.\n",
-        ) + &build_stats(&state)
+        messages::recall_failure_message(user_proof, state)
     }
 }
 
-fn quiet_message(msg: &str) -> InteractionResponse {
-    let m: InteractionResponse = InteractionResponse::message()
+fn plain_message(msg: &str) -> InteractionResponse {
+    InteractionResponse::message()
         .content(msg)
         .components(build_action_row())
-        .into();
-    m.edit()
+        .into()
+}
+
+fn quiet_message(msg: &str) -> InteractionResponse {
+    plain_message(msg).edit()
 }
 
 fn loud_message(msg: &str) -> InteractionResponse {
@@ -202,7 +169,7 @@ impl Handler for ShellsHandler {
     fn handle_application_command(&self, req: &InteractionRequest) -> InteractionResponse {
         let state: InteractionState = req.into();
 
-        quiet_message(&build_rules_message(state))
+        plain_message(&messages::welcome_message(state))
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
@@ -219,7 +186,7 @@ impl Handler for ShellsHandler {
 
             "recall" => modal("submit_recall", "Circle of Recall", build_recall_fields()),
 
-            "rules" => quiet_message(&(build_rules_message(state))),
+            "rules" => quiet_message(&messages::rules_message(state)),
 
             &_ => panic!("unknown message command"),
         };
@@ -303,7 +270,7 @@ mod tests {
 
         assert_eq!(
             resp.message_content().unwrap(),
-            "# :woman_elf::magic_wand:\nYou are given 5 free :shell:s.\n*Come again anytime!*\n# Your Stats\nYou have: 3048 :shell:s\nYou are betting: 0 :shell:s\nYou have: 0 :star2:s\n".to_string()
+            "# :woman_elf::beach:\n\nYou gain 5 :shell:s.\n\n# Your Stats\nYou have: 3048 :shell:s\nYou are betting: 0 :shell:s\nYou have: 0 :star2:s\n".to_string()
         );
     }
 }
