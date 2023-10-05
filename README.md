@@ -15,6 +15,14 @@ One of the most immediately noticeable features of Rust is the Rust compiler, wh
 
 To develop on this app, you will need Cargo >= 1.71.0.
 
+## Environment Setup
+There are no required environment variables for the (non-web) proejct. If you want control over how gambling hashing is determined, you will need to set the following environment variable:
+- `SOMMELIER_GAMBLING_SALT`
+
+This variable is a secret key that will randomize an aspect of gambling in the app.
+
+The way you do this will depend on your terminal. A way of doing this in VS Code can be found [here](https://stackoverflow.com/questions/48595446/is-there-any-way-to-set-environment-variables-in-visual-studio-code).
+
 # If you want to write code...
 
 ## Just modify the code in the `app/` folder
@@ -63,8 +71,9 @@ You will also need the following environment variables:
 - `SOMMELIER_APPLICATION_ID`
 - `SOMMELIER_BOT_TOKEN`
 - `SOMMELIER_LAMBDA_EXECUTION_ROLE`
+- `SOMMELIER_GAMBLING_SALT`
 
-The first three of these can be found in the Discord Developer Portal. `SOMMELIER_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. 
+The first three of these can be found in the Discord Developer Portal. `SOMMELIER_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. `SOMMELIER_GAMBLING_SALT` is the variable required for the app itself.
 
 ## Deploying
 To deploy the project, run the `deploy.sh` scripts, which builds the project, and then deploys it to a lambda named `sommelier`. 

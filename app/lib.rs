@@ -8,7 +8,7 @@ pub mod interactions;
 
 use crate::interactions::InteractionType::*;
 use crate::interactions::*;
-use handlers::{DeedeeHandler, ErrorHandler, GambleHandler, GameOfLifeHandler, Handler};
+use handlers::{DeedeeHandler, ErrorHandler, GameOfLifeHandler, Handler, ShellsHandler};
 
 pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     match request.r#type {
@@ -17,6 +17,8 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
         ApplicationCommand => handle_application_command(request),
 
         MessageComponent => handle_message_component(request),
+
+        ModalSubmit => handle_modal_submit(request),
     }
 }
 
@@ -30,20 +32,15 @@ fn select_handler(name: &str) -> Box<dyn Handler> {
 
         "deedee" => Box::new(DeedeeHandler),
 
-        "gamble" => Box::new(GambleHandler),
+        "shells" => Box::new(ShellsHandler),
 
         _ => Box::new(ErrorHandler),
     }
 }
 
 fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
-    match &request.data {
-        Some(interaction_data) => match &interaction_data.name {
-            Some(name) => select_handler(name).handle_application_command(request),
-
-            None => make_error_response(),
-        },
-
+    match request.command_name() {
+        Some(name) => select_handler(&name).handle_application_command(request),
         None => make_error_response(),
     }
 }
@@ -61,62 +58,47 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
     select_handler(name).handle_message_component(request)
 }
 
+fn handle_modal_submit(request: &InteractionRequest) -> InteractionResponse {
+    let name = &request
+        .message
+        .as_ref()
+        .unwrap()
+        .interaction
+        .as_ref()
+        .unwrap()
+        .name;
+
+    select_handler(name).handle_modal_submit(request)
+}
+
 fn make_error_response() -> InteractionResponse {
-    InteractionResponse::new().message("Something erroneous happened...")
+    InteractionResponse::message()
+        .content("Something erroneous happened...")
+        .into()
 }
 
 #[cfg(test)]
 mod tests {
 
     use super::*;
-    use crate::InteractionCallbackType::*;
     use handlers::SIZE;
-
-    fn anonymous_request(
-        r#type: InteractionType,
-        data: Option<InteractionData>,
-    ) -> InteractionRequest {
-        InteractionRequest {
-            id: "DEBUG_INTERACTION_ID".to_string(),
-            application_id: "DEBUG_APP_ID".to_string(),
-            r#type: r#type,
-            data: data,
-            guild_id: Some("DEBUG_GUILD_ID".to_string()),
-            channel_id: Some("DEBUG_CHANNEL_ID".to_string()),
-            member: Some(GuildMember {
-                user: Some(User {
-                    id: "DEBUG_USER_ID".to_string(),
-                }),
-                nick: Some("DEBUG_NICKNAME".to_string()),
-            }),
-            message: Some(Message {
-                content: "DEBUG_MESSAGE_CONTENT".to_string(),
-                interaction: None,
-            }),
-        }
-    }
 
     #[test]
     fn test_ping_pong() {
-        let req = anonymous_request(Ping, None);
+        let req = InteractionRequest::ping();
 
         let resp = handle_interaction(&req);
 
-        assert_eq!(resp.r#type, InteractionCallbackType::Pong);
+        assert_eq!(resp, InteractionResponse::pong());
     }
 
     #[test]
     fn test_conway() {
-        let req_data = InteractionData {
-            name: Some("conway".to_string()),
-            custom_id: None,
-        };
-
-        let req = anonymous_request(ApplicationCommand, Some(req_data));
+        let req: InteractionRequest = InteractionRequest::application_command("conway").into();
 
         let resp = handle_interaction(&req);
 
-        let content = resp.data.content.expect("no content in data!");
+        let content = resp.message_content().unwrap();
 
         let resp_emoji_count = content.matches("🌝").count() + content.matches("🌚").count();
 
@@ -128,51 +110,25 @@ mod tests {
 
     #[test]
     fn test_deedee() {
-        let req_data = InteractionData {
-            name: Some("deedee".to_string()),
-            custom_id: None,
-        };
-
-        let req = anonymous_request(ApplicationCommand, Some(req_data));
+        let req = InteractionRequest::application_command("deedee").into();
 
         let resp = handle_interaction(&req);
 
-        let expected_resp_data = InteractionCallbackData {
-            content: Some("mega doo doo".to_string()),
-            components: Vec::new(),
-            flags: Some(MessageFlags::Ephemeral),
-        };
-
-        let expected_resp = InteractionResponse {
-            r#type: ChannelMessageWithSource,
-            data: expected_resp_data,
-        };
+        let expected_resp = InteractionResponse::message()
+            .content("mega doo doo")
+            .into();
 
         assert_eq!(resp, expected_resp);
     }
 
     #[test]
-    fn test_gamble() {
-        let req_data = InteractionData {
-            name: Some("gamble".to_string()),
-            custom_id: None,
-        };
-
-        let req = anonymous_request(ApplicationCommand, Some(req_data));
+    fn shell_game() {
+        let req = InteractionRequest::application_command("shells").into();
 
         let resp = handle_interaction(&req);
 
-        let components = resp.data.components;
+        let components = resp.message_components();
 
-        assert_eq!(components.len(), 1);
-
-        let buttons = &components[0].components;
-
-        assert_eq!(buttons.len(), 4);
-
-        assert_eq!(buttons[0].r#type, ComponentType::Button);
-        assert_eq!(buttons[1].r#type, ComponentType::Button);
-        assert_eq!(buttons[2].r#type, ComponentType::Button);
-        assert_eq!(buttons[3].r#type, ComponentType::Button);
+        assert_eq!(components.len(), 5);
     }
 }

@@ -80,6 +80,6 @@ impl Handler for GameOfLifeHandler {
         let next_grid = next_generation(griddy);
         let output = grid_to_emotes(griddy) + "\n" + &grid_to_emotes(next_grid);
 
-        InteractionResponse::new().message(&output)
+        InteractionResponse::message().content(&output).into()
     }
 }
