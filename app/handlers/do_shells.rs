@@ -14,54 +14,89 @@ use std::collections;
 
 const FREE_AMT: u64 = 5;
 
-fn build_action_row() -> Vec<Component> {
-    let roll_button = Component::button().label("roll").id("roll").into();
-    let free_button = Component::button().label("free").id("free").into();
-    let brag_button = Component::button().label("brag").id("brag").into();
-    let recall_button = Component::button().label("recall").id("recall").into();
-    let rules_button = Component::button().label("rules").id("rules").into();
+pub struct ShellsHandler;
 
-    vec![
-        roll_button,
-        free_button,
-        brag_button,
-        recall_button,
-        rules_button,
-    ]
+impl Handler for ShellsHandler {
+    fn handle_application_command(&self, req: &InteractionRequest) -> InteractionResponse {
+        let state: InteractionState = req.into();
+
+        plain_message(&messages::welcome_message(&state))
+    }
+
+    fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
+        let state: InteractionState = req.into();
+
+        let id = req.custom_id().unwrap();
+
+        let res: InteractionResponse = match id.as_str() {
+            "roll" => quiet_message(&roll_result(state)),
+
+            "free" => quiet_message(&free_result(state)),
+
+            "brag" => loud_message(&brag_result(state)),
+
+            "recall" => modal("submit_recall", "Circle of Recall", build_recall_fields()),
+
+            "rules" => quiet_message(&rules_result(state)),
+
+            &_ => panic!("unknown message command"),
+        };
+
+        match id.as_str() {
+            "brag" => res,
+            "recall" => res,
+            _ => res.edit(),
+        }
+    }
+
+    fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
+        let id = req.custom_id().unwrap();
+
+        match id.as_str() {
+            "submit_recall" => {
+                let state: InteractionState = req.into();
+
+                let content = recall_submit_result(state, req.modal_submit_values());
+
+                let resp: InteractionResponse = InteractionResponse::message()
+                    .content(&content)
+                    .components(build_action_row())
+                    .into();
+
+                resp.edit()
+            }
+
+            &_ => todo!(),
+        }
+    }
 }
 
-fn build_recall_fields() -> Vec<Component> {
-    let claim = Component::text_input().label("claim").id("claim").into();
-    let proof = Component::text_input().label("proof").id("proof").into();
-    vec![claim, proof]
-}
-
-fn build_roll_result(mut state: InteractionState) -> String {
+fn roll_result(mut state: InteractionState) -> String {
     let bet = state.game_state.bet;
     let bank = state.game_state.bank;
 
     if bet > bank {
-        messages::roll_failure_message(state)
+        messages::roll_failure_message(&state)
     } else {
         let mut rng = thread_rng();
         let roll: u64 = rng.gen_range(0, 4);
         let winnings = roll * bet;
         state.game_state.bank = bank - bet + winnings;
-        messages::roll_success_message(roll, bet, state)
+        messages::roll_success_message(roll, bet, &state)
     }
 }
 
-fn build_free_result(mut state: InteractionState) -> String {
+fn free_result(mut state: InteractionState) -> String {
     state.game_state.bank += FREE_AMT;
-    messages::free_message(Some(FREE_AMT), None, state)
+    messages::free_message(Some(FREE_AMT), None, &state)
 }
 
-fn build_brag_result(state: InteractionState) -> String {
+fn brag_result(state: InteractionState) -> String {
     let proof = sselvish::proof(&state.user, &state.game_state.bank.to_string());
-    messages::brag_message(&proof, state)
+    messages::brag_message(&proof, &state)
 }
 
-fn build_recall_submit_result(
+fn recall_submit_result(
     mut state: InteractionState,
     fields: collections::HashMap<String, String>,
 ) -> String {
@@ -73,10 +108,14 @@ fn build_recall_submit_result(
     if user_proof == expected_proof && user_claim.is_ok() {
         state.game_state.bank = user_claim.unwrap();
 
-        messages::recall_success_message(user_proof, state)
+        messages::recall_success_message(user_proof, &state)
     } else {
-        messages::recall_failure_message(user_proof, state)
+        messages::recall_failure_message(user_proof, &state)
     }
+}
+
+fn rules_result(state: InteractionState) -> String {
+    messages::rules_message(&state)
 }
 
 fn plain_message(msg: &str) -> InteractionResponse {
@@ -102,61 +141,26 @@ fn modal(id: &str, title: &str, comps: Vec<Component>) -> InteractionResponse {
         .into()
 }
 
-pub struct ShellsHandler;
+fn build_action_row() -> Vec<Component> {
+    let roll_button = Component::button().label("roll").id("roll").into();
+    let free_button = Component::button().label("free").id("free").into();
+    let brag_button = Component::button().label("brag").id("brag").into();
+    let recall_button = Component::button().label("recall").id("recall").into();
+    let rules_button = Component::button().label("rules").id("rules").into();
 
-impl Handler for ShellsHandler {
-    fn handle_application_command(&self, req: &InteractionRequest) -> InteractionResponse {
-        let state: InteractionState = req.into();
+    vec![
+        roll_button,
+        free_button,
+        brag_button,
+        recall_button,
+        rules_button,
+    ]
+}
 
-        plain_message(&messages::welcome_message(state))
-    }
-
-    fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
-        let state: InteractionState = req.into();
-
-        let id = req.custom_id().unwrap();
-
-        let res: InteractionResponse = match id.as_str() {
-            "roll" => quiet_message(&build_roll_result(state)),
-
-            "free" => quiet_message(&build_free_result(state)),
-
-            "brag" => loud_message(&build_brag_result(state)),
-
-            "recall" => modal("submit_recall", "Circle of Recall", build_recall_fields()),
-
-            "rules" => quiet_message(&messages::rules_message(state)),
-
-            &_ => panic!("unknown message command"),
-        };
-
-        match id.as_str() {
-            "brag" => res,
-            "recall" => res,
-            _ => res.edit(),
-        }
-    }
-
-    fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
-        let id = req.custom_id().unwrap();
-
-        match id.as_str() {
-            "submit_recall" => {
-                let state: InteractionState = req.into();
-
-                let content = build_recall_submit_result(state, req.modal_submit_values());
-
-                let resp: InteractionResponse = InteractionResponse::message()
-                    .content(&content)
-                    .components(build_action_row())
-                    .into();
-
-                resp.edit()
-            }
-
-            &_ => todo!(),
-        }
-    }
+fn build_recall_fields() -> Vec<Component> {
+    let claim = Component::text_input().label("claim").id("claim").into();
+    let proof = Component::text_input().label("proof").id("proof").into();
+    vec![claim, proof]
 }
 
 #[cfg(test)]
