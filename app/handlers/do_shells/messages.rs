@@ -41,6 +41,34 @@ pub fn roll_failure_message(state: &InteractionState) -> String {
         + &build_stats(state)
 }
 
+pub fn set_roll_success_message(bet: u64, state: &InteractionState) -> String {
+    format!(
+        r#"# :game_die:
+
+Your new roll amount is *{}*.
+"#,
+        bet,
+    ) + &build_stats(state)
+}
+
+pub fn set_roll_amt_failure_message(state: &InteractionState) -> String {
+    r#"# :game_die:
+
+You can't try to roll to be more than you have in your bank!
+"#
+    .to_string()
+        + &build_stats(state)
+}
+
+pub fn set_roll_parse_failure_message(state: &InteractionState) -> String {
+    r#"# :game_die:
+
+You have to set your roll to a number!
+"#
+    .to_string()
+        + &build_stats(state)
+}
+
 pub fn free_message(gain: Option<u64>, insp: Option<u64>, state: &InteractionState) -> String {
     r#"# :beach:
 "#

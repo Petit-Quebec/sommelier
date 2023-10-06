@@ -29,7 +29,6 @@ impl Handler for ShellsHandler {
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
         let state: InteractionState = req.into();
-
         let id = req.custom_id().unwrap();
 
         let res: InteractionResponse = match id.as_str() {
@@ -45,15 +44,13 @@ impl Handler for ShellsHandler {
     }
 
     fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
+        let state: InteractionState = req.into();
+        let values = req.modal_submit_values();
         let id = req.custom_id().unwrap();
 
         match id.as_str() {
-            "submit_recall" => {
-                let state: InteractionState = req.into();
-                let content = recall_submit_result(state, req.modal_submit_values());
-                quiet_message(&content)
-            }
-
+            "submit_recall" => quiet_message(&recall_submit_result(state, values)),
+            "set_roll" => quiet_message(&set_roll_submit_result(state, values)),
             &_ => todo!(),
         }
     }
@@ -109,6 +106,25 @@ fn recall_submit_result(
         messages::recall_success_message(user_proof, &state)
     } else {
         messages::recall_failure_message(user_proof, &state)
+    }
+}
+
+fn set_roll_submit_result(
+    mut state: InteractionState,
+    fields: collections::HashMap<String, String>,
+) -> String {
+    let bet = fields.get("roll_amt").unwrap().parse::<u64>();
+
+    if bet.is_ok() {
+        let bet = bet.unwrap();
+        if bet <= state.game_state.bank {
+            state.game_state.bet = bet;
+            messages::set_roll_success_message(bet, &state)
+        } else {
+            messages::set_roll_amt_failure_message(&state)
+        }
+    } else {
+        messages::set_roll_parse_failure_message(&state)
     }
 }
 
