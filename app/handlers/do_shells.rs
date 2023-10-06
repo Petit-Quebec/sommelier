@@ -35,7 +35,6 @@ impl Handler for ShellsHandler {
             "free" => quiet_message(&free_result(state)),
             "brag" => loud_message(&brag_result(state)),
             "recall" => recall_modal("submit_recall", "Circle of Recall"),
-            "rules" => quiet_message(&rules_result(state)),
             &_ => panic!("unknown message command"),
         };
 
@@ -112,10 +111,6 @@ fn recall_submit_result(
     } else {
         messages::recall_failure_message(user_proof, &state)
     }
-}
-
-fn rules_result(state: InteractionState) -> String {
-    messages::rules_message(&state)
 }
 
 #[cfg(test)]
