@@ -9,7 +9,9 @@ mod state;
 
 use crate::handlers::Handler;
 use crate::{InteractionRequest, InteractionResponse};
-use interaction_wrappers::{loud_message, plain_message, quiet_message, recall_modal};
+use interaction_wrappers::{
+    loud_message, plain_message, quiet_message, recall_modal, set_roll_modal,
+};
 use rand::{thread_rng, Rng};
 use state::InteractionState;
 use std::collections;
@@ -32,17 +34,14 @@ impl Handler for ShellsHandler {
 
         let res: InteractionResponse = match id.as_str() {
             "roll" => quiet_message(&roll_result(state)),
+            "set_roll" => set_roll_modal("set_roll", "Set Roll Amount"),
             "free" => quiet_message(&free_result(state)),
             "brag" => loud_message(&brag_result(state)),
             "recall" => recall_modal("submit_recall", "Circle of Recall"),
             &_ => panic!("unknown message command"),
         };
 
-        match id.as_str() {
-            "brag" => res,
-            "recall" => res,
-            _ => res.edit(),
-        }
+        res
     }
 
     fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
