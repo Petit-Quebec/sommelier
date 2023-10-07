@@ -35,7 +35,7 @@ impl Handler for ShellsHandler {
             "roll" => quiet_message(&roll_result(state)),
             "set_roll" => set_roll_modal("set_roll", "Set Roll Amount"),
             "free" => quiet_message(&free_result(state)),
-            "brag" => loud_message(&brag_result(state)),
+            "brag" => quiet_message(&brag_result(state)),
             "recall" => recall_modal("submit_recall", "Circle of Recall"),
             &_ => panic!("unknown message command"),
         };
@@ -71,15 +71,15 @@ fn roll_result(mut state: InteractionState) -> String {
 }
 
 fn free_result(mut state: InteractionState) -> String {
-    let roll: u8 = thread_rng().gen_range(0, 10);
+    let roll: u8 = thread_rng().gen_range(0, 4);
     match roll {
-        // 10% chance
+        // 25% chance
         0 => {
             state.game_state.insp += FREE_INSP_AMT;
             messages::free_message(None, Some(FREE_INSP_AMT), &state)
         }
 
-        // 90% chance
+        // 75% chance
         1.. => {
             state.game_state.bank += FREE_SHELLS_AMT;
             messages::free_message(Some(FREE_SHELLS_AMT), None, &state)
@@ -87,9 +87,19 @@ fn free_result(mut state: InteractionState) -> String {
     }
 }
 
-fn brag_result(state: InteractionState) -> String {
-    let proof = sselvish::proof(&state.user, &state.game_state.bank.to_string());
-    messages::brag_message(&proof, &state)
+fn shout_brag(proof: &str) -> () {
+    ()
+}
+
+fn brag_result(mut state: InteractionState) -> String {
+    if state.game_state.insp > 0 {
+        state.game_state.insp -= 1;
+        let proof = sselvish::proof(&state.user, &state.game_state.bank.to_string());
+        shout_brag(&proof);
+        messages::brag_success_message(&state)
+    } else {
+        messages::brag_failure_message(&state)
+    }
 }
 
 fn recall_submit_result(

@@ -95,7 +95,25 @@ pub fn free_message(gain: Option<u64>, insp: Option<u64>, state: &InteractionSta
         + &build_stats(state)
 }
 
-pub fn brag_message(proof: &str, state: &InteractionState) -> String {
+pub fn brag_success_message(state: &InteractionState) -> String {
+    r#"# :trumpet: Horn of Triumph :trumpet:
+
+You brag about your achievement, and are provided with **Sselvish proof** of your deed!
+"#
+    .to_string()
+        + &build_stats(state)
+}
+
+pub fn brag_failure_message(state: &InteractionState) -> String {
+    r#"# :trumpet: Horn of Triumph :trumpet:
+
+You blow into the horn, but can't make a sound. You need a :star2: to brag!
+"#
+    .to_string()
+        + &build_stats(state)
+}
+
+pub fn brag_shout(proof: &str, state: &InteractionState) -> String {
     let user = &state.user;
 
     let bank = state.game_state.bank;
