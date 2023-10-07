@@ -11,11 +11,11 @@ pub fn welcome_message(state: &InteractionState) -> String {
 
 :bubbles: **Set Roll** allows you to set the amount of :shell:s you want to roll.
 
-:beach: **Free** will give you a small number of :shell:s for free. Or, you could get a :star2:...
+:beach: **Free** will give you a small number of :shell:s for free. You could even get a :squid:...
 
-:trumpet: **Brag** will consume a :star2: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish.
+:scroll: **Proof** will consume a :squid: to create a record of your winnings. This record will include proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish.
 
-:leaves: **Recall** allows you reset your current gambling run to a past gambling run that you **bragged** about.
+:leaves: **Recall** allows you set your current :shell:s to a past amount of :shell:s, provided you have **proof** of that achievement.
 "#.to_string()
  + &build_stats(state)
 }
@@ -88,7 +88,7 @@ pub fn free_message(gain: Option<u64>, insp: Option<u64>, state: &InteractionSta
                 "A glimmer in the sand catches your eye. Upon further inspection, you find "
                     .to_string()
                     + &i.to_string()
-                    + " :star2:s!\n"
+                    + " :squid:s!\n"
             }
             None => "".to_string(),
         }

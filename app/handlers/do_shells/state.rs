@@ -7,7 +7,7 @@ const BANK_SUFFIX: &str = ":shell:s";
 const BET_PREFIX: &str = "You are betting:";
 const BET_SUFFIX: &str = ":shell:s";
 const INSP_PREFIX: &str = "You have:";
-const INSP_SUFFIX: &str = ":star2:s";
+const INSP_SUFFIX: &str = ":squid:s";
 
 pub struct InteractionState {
     pub user: String,
