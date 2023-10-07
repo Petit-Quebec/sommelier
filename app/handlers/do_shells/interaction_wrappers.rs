@@ -32,14 +32,14 @@ fn build_action_row() -> Vec<Component> {
     let roll_button = Component::button().label("roll").id("roll").into();
     let set_roll_button = Component::button().label("set roll").id("set_roll").into();
     let free_button = Component::button().label("free").id("free").into();
-    let brag_button = Component::button().label("brag").id("brag").into();
+    let proof_button = Component::button().label("proof").id("proof").into();
     let recall_button = Component::button().label("recall").id("recall").into();
 
     vec![
         roll_button,
         set_roll_button,
         free_button,
-        brag_button,
+        proof_button,
         recall_button,
     ]
 }

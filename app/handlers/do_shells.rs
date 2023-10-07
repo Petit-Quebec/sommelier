@@ -33,7 +33,7 @@ impl Handler for ShellsHandler {
             "roll" => edit_message(&roll_result(state)),
             "set_roll" => set_roll_modal("set_roll", "Set Roll Amount"),
             "free" => edit_message(&free_result(state)),
-            "brag" => edit_message(&brag_result(state)),
+            "proof" => edit_message(&proof_result(state)),
             "recall" => recall_modal("submit_recall", "Circle of Recall"),
             &_ => panic!("unknown message command"),
         };
@@ -85,13 +85,13 @@ fn free_result(mut state: InteractionState) -> String {
     }
 }
 
-fn brag_result(mut state: InteractionState) -> String {
+fn proof_result(mut state: InteractionState) -> String {
     if state.game_state.insp > 0 {
         state.game_state.insp -= 1;
         let proof = sselvish::proof(&state.user, &state.game_state.bank.to_string());
-        messages::brag_success_message(&state)
+        messages::proof_success_message(&proof, &state)
     } else {
-        messages::brag_failure_message(&state)
+        messages::proof_failure_message(&state)
     }
 }
 

@@ -95,41 +95,34 @@ pub fn free_message(gain: Option<u64>, insp: Option<u64>, state: &InteractionSta
         + &build_stats(state)
 }
 
-pub fn brag_success_message(state: &InteractionState) -> String {
-    r#"# :trumpet: Horn of Triumph :trumpet:
-
-You brag about your achievement, and are provided with **Sselvish proof** of your deed!
-"#
-    .to_string()
-        + &build_stats(state)
-}
-
-pub fn brag_failure_message(state: &InteractionState) -> String {
-    r#"# :trumpet: Horn of Triumph :trumpet:
-
-You blow into the horn, but can't make a sound. You need a :star2: to brag!
-"#
-    .to_string()
-        + &build_stats(state)
-}
-
-pub fn brag_shout(proof: &str, state: &InteractionState) -> String {
+pub fn proof_success_message(proof: &str, state: &InteractionState) -> String {
     let user = &state.user;
-
     let bank = state.game_state.bank;
-
     format!(
-        r#"## <@{}> has {} :shell:s!
+        r#"# :scroll: The Scribe :scroll:
 
-## <@{}> is {}!
-
-### Proof: *{}*"#,
+Let it be noted to the public that:
+> <@{}> has {} :shell:s!
+> <@{}> is a {}!
+### Proof: *{}*
+"#,
         user,
         bank,
         user,
         honorific(bank),
         proof
-    )
+    ) + &build_stats(state)
+}
+
+pub fn proof_failure_message(state: &InteractionState) -> String {
+    r#":scroll: The Scribe :scroll:
+
+The Scribe cannot provide proof of your deed without a :squid:!
+
+You can find :squid:s at the **beach**!
+"#
+    .to_string()
+        + &build_stats(state)
 }
 
 fn honorific(bank: u64) -> String {
