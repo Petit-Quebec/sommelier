@@ -63,23 +63,24 @@ fn roll_result(mut state: InteractionState) -> String {
     if bet > bank {
         messages::roll_failure_message(&state)
     } else {
-        let mut rng = thread_rng();
-        let roll: u64 = rng.gen_range(0, 4);
+        let roll: u64 = thread_rng().gen_range(0, 4);
         let winnings = roll * bet;
         state.game_state.bank = bank - bet + winnings;
-        messages::roll_success_message(roll, bet, &state)
+        messages::roll_success_message(bet, roll, &state)
     }
 }
 
 fn free_result(mut state: InteractionState) -> String {
-    let mut rng = thread_rng();
-    let roll: u8 = rng.gen_range(0, 255);
+    let roll: u8 = thread_rng().gen_range(0, 10);
     match roll {
-        0..=127 => {
+        // 10% chance
+        0 => {
             state.game_state.insp += FREE_INSP_AMT;
             messages::free_message(None, Some(FREE_INSP_AMT), &state)
         }
-        128.. => {
+
+        // 90% chance
+        1.. => {
             state.game_state.bank += FREE_SHELLS_AMT;
             messages::free_message(Some(FREE_SHELLS_AMT), None, &state)
         }

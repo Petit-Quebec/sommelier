@@ -7,13 +7,15 @@ fn build_stats(state: &InteractionState) -> String {
 pub fn welcome_message(state: &InteractionState) -> String {
     r#"# :woman_elf::shell: Shell Game :shell:
 
-**Roll** to bet your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back, with equal probability.
+**Roll** to bet your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back.
 
-**Free** will give you a small number of :shell:s for free! Or you could get a :star2:...
+**Set Roll* to choose the amount of :shell:s you want to roll.
+
+**Free** to give you a small number of :shell:s for free. Or, you could get a :star2:...
 
 **Brag** will consume a :star2: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish.
 
-**Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!
+**Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about.
 "#.to_string()
  + &build_stats(state)
 }
