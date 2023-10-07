@@ -1,18 +1,15 @@
 use crate::{Component, InteractionResponse};
 
-pub fn plain_message(msg: &str) -> InteractionResponse {
+pub fn new_message(msg: &str) -> InteractionResponse {
     InteractionResponse::message()
         .content(msg)
         .components(build_action_row())
+        .shout()
         .into()
 }
 
-pub fn quiet_message(msg: &str) -> InteractionResponse {
-    plain_message(msg).edit()
-}
-
-pub fn loud_message(msg: &str) -> InteractionResponse {
-    InteractionResponse::message().content(msg).shout().into()
+pub fn edit_message(msg: &str) -> InteractionResponse {
+    new_message(msg).edit()
 }
 
 pub fn recall_modal(id: &str, title: &str) -> InteractionResponse {

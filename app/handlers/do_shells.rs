@@ -9,9 +9,7 @@ mod state;
 
 use crate::handlers::Handler;
 use crate::{InteractionRequest, InteractionResponse};
-use interaction_wrappers::{
-    loud_message, plain_message, quiet_message, recall_modal, set_roll_modal,
-};
+use interaction_wrappers::{edit_message, new_message, recall_modal, set_roll_modal};
 use rand::{thread_rng, Rng};
 use state::InteractionState;
 use std::collections;
@@ -24,7 +22,7 @@ pub struct ShellsHandler;
 impl Handler for ShellsHandler {
     fn handle_application_command(&self, req: &InteractionRequest) -> InteractionResponse {
         let state: InteractionState = req.into();
-        plain_message(&messages::welcome_message(&state))
+        new_message(&messages::welcome_message(&state))
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
@@ -32,10 +30,10 @@ impl Handler for ShellsHandler {
         let id = req.custom_id().unwrap();
 
         let res: InteractionResponse = match id.as_str() {
-            "roll" => quiet_message(&roll_result(state)),
+            "roll" => edit_message(&roll_result(state)),
             "set_roll" => set_roll_modal("set_roll", "Set Roll Amount"),
-            "free" => quiet_message(&free_result(state)),
-            "brag" => quiet_message(&brag_result(state)),
+            "free" => edit_message(&free_result(state)),
+            "brag" => edit_message(&brag_result(state)),
             "recall" => recall_modal("submit_recall", "Circle of Recall"),
             &_ => panic!("unknown message command"),
         };
@@ -49,8 +47,8 @@ impl Handler for ShellsHandler {
         let id = req.custom_id().unwrap();
 
         match id.as_str() {
-            "submit_recall" => quiet_message(&recall_submit_result(state, values)),
-            "set_roll" => quiet_message(&set_roll_submit_result(state, values)),
+            "submit_recall" => edit_message(&recall_submit_result(state, values)),
+            "set_roll" => edit_message(&set_roll_submit_result(state, values)),
             &_ => todo!(),
         }
     }
@@ -87,15 +85,10 @@ fn free_result(mut state: InteractionState) -> String {
     }
 }
 
-fn shout_brag(proof: &str) -> () {
-    ()
-}
-
 fn brag_result(mut state: InteractionState) -> String {
     if state.game_state.insp > 0 {
         state.game_state.insp -= 1;
         let proof = sselvish::proof(&state.user, &state.game_state.bank.to_string());
-        shout_brag(&proof);
         messages::brag_success_message(&state)
     } else {
         messages::brag_failure_message(&state)
