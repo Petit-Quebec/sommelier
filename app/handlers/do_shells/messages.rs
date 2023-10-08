@@ -5,24 +5,24 @@ fn build_stats(state: &InteractionState) -> String {
 }
 
 pub fn welcome_message(state: &InteractionState) -> String {
-    r#"# :woman_elf::shell: Shell Game :shell:
+    r#"# :woman_elf: Shell Game :woman_elf:
 
 :game_die: **Roll** will roll on your :shell:s, to receive 0x, 1x, 2x, or 3x the amount of :shell:s back.
 
-:bubbles: **Set Roll** allows you to set the amount of :shell:s you want to roll.
+:abacus: **Set** allows you to set the amount of :shell:s you want to roll.
 
 :beach: **Free** will give you a small number of :shell:s for free. You could even get a :squid:...
 
 :scroll: **Proof** will consume a :squid: to create a record of your winnings. This record will include proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish.
 
-:leaves: **Recall** allows you set your current :shell:s to a past amount of :shell:s, provided you have **proof** of that achievement.
+:wind_blowing_face: **Recall** allows you set your current :shell:s to a past amount of :shell:s, provided you have **proof** of that achievement.
 "#.to_string()
  + &build_stats(state)
 }
 
 pub fn roll_success_message(bet: u64, roll: u64, state: &InteractionState) -> String {
     format!(
-        r#"# :woman_elf::game_die: Shell Roll :game_die:
+        r#"# :game_die: Roll the Dice! :game_die:
 
 You rolled on {} :shell:s...
 
@@ -37,7 +37,7 @@ You **won** {} :shell:s!
 }
 
 pub fn roll_failure_message(state: &InteractionState) -> String {
-    r#"# :woman_elf::game_die: Shell Roll :game_die:
+    r#"# :game_die: Roll the Dice! :game_die:
 
 You can't roll on more :shell:s than you have!
 "#
@@ -47,7 +47,7 @@ You can't roll on more :shell:s than you have!
 
 pub fn set_roll_success_message(bet: u64, state: &InteractionState) -> String {
     format!(
-        r#"# :bubbles: Set Roll :bubbles:
+        r#"# :abacus: Crunching Numbers :abacus:
 
 You set your roll amount to {}.
 "#,
@@ -56,7 +56,7 @@ You set your roll amount to {}.
 }
 
 pub fn set_roll_amt_failure_message(state: &InteractionState) -> String {
-    r#"# :bubbles: Set Roll :bubbles:
+    r#"# :abacus: Crunching Numbers :abacus:
 
 You can't try to roll more than you have in your bank!
 "#
@@ -65,7 +65,7 @@ You can't try to roll more than you have in your bank!
 }
 
 pub fn set_roll_parse_failure_message(state: &InteractionState) -> String {
-    r#"# :bubbles: Set Roll :bubbles:
+    r#"# :abacus: Crunching Numbers :abacus:
 
 You can only set your roll to a number!
 "#
@@ -74,7 +74,7 @@ You can only set your roll to a number!
 }
 
 pub fn free_message(gain: Option<u64>, insp: Option<u64>, state: &InteractionState) -> String {
-    r#"# :beach: Shimmering Sands :beach:
+    r#"# :beach: Tidepools :beach:
 "#
     .to_string()
         + &match gain {
@@ -115,7 +115,7 @@ Let it be noted to the public that:
 }
 
 pub fn proof_failure_message(state: &InteractionState) -> String {
-    r#":scroll: The Scribe :scroll:
+    r#"# :scroll: The Scribe :scroll:
 
 The Scribe cannot provide proof of your deed without a :squid:!
 
@@ -137,7 +137,7 @@ fn honorific(bank: u64) -> String {
 
 pub fn recall_success_message(proof: &str, state: &InteractionState) -> String {
     format!(
-        r#"# :leaves: Circle of Recall :leaves:
+        r#"# :wind_blowing_face: Circle of Recall :wind_blowing_face:
 
 You utter your **Sselvish** proof: *{}*. 
 
@@ -149,7 +149,7 @@ Your claim is legitimate! You recall {} :shell:s!
 
 pub fn recall_failure_message(proof: &str, state: &InteractionState) -> String {
     format!(
-        r#"# :leaves: Circle of Recall :leaves:
+        r#"# :wind_blowing_face: Circle of Recall :wind_blowing_face:
 
 You utter your **Sselvish** proof: *{}*. 
 

@@ -30,7 +30,7 @@ pub fn set_roll_modal(id: &str, title: &str) -> InteractionResponse {
 
 fn build_action_row() -> Vec<Component> {
     let roll_button = Component::button().label("roll").id("roll").into();
-    let set_roll_button = Component::button().label("set roll").id("set_roll").into();
+    let set_roll_button = Component::button().label("set").id("set_roll").into();
     let free_button = Component::button().label("free").id("free").into();
     let proof_button = Component::button().label("proof").id("proof").into();
     let recall_button = Component::button().label("recall").id("recall").into();
