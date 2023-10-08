@@ -2,257 +2,134 @@
  * Implementation of "gamble" command.
  */
 
+mod interaction_wrappers;
+mod messages;
+mod sselvish;
 mod state;
 
 use crate::handlers::Handler;
-use crate::{Component, InteractionRequest, InteractionResponse};
-use hex::FromHex;
+use crate::{InteractionRequest, InteractionResponse};
+use interaction_wrappers::{edit_message, new_message, recall_modal, set_roll_modal};
 use rand::{thread_rng, Rng};
-use sha256::digest;
 use state::InteractionState;
-use std::collections;
+use std::{cmp, collections};
 
-const SALT: Option<&str> = option_env!("SOMMELIER_GAMBLING_SALT");
-const FREE_AMT: u64 = 5;
-const BANK_PREFIX: &str = "You have: ";
-const BANK_SUFFIX: &str = " :shell:s";
-const INSP_PREFIX: &str = "You have: ";
-const INSP_SUFFIX: &str = " :zap:";
-const PROOF_LENGTH: usize = 12;
-
-fn build_action_row() -> Vec<Component> {
-    let roll_button = Component::button().label("roll").id("roll").into();
-    let free_button = Component::button().label("free").id("free").into();
-    let brag_button = Component::button().label("brag").id("brag").into();
-    let recall_button = Component::button().label("recall").id("recall").into();
-    let rules_button = Component::button().label("rules").id("rules").into();
-
-    vec![
-        roll_button,
-        free_button,
-        brag_button,
-        recall_button,
-        rules_button,
-    ]
-}
-
-fn build_recall_fields() -> Vec<Component> {
-    let claim = Component::text_input().label("claim").id("claim").into();
-    let proof = Component::text_input().label("proof").id("proof").into();
-    vec![claim, proof]
-}
-
-fn build_rules_message() -> String {
-    "# :woman_elf::shell: Shell Game :shell:
-
-**Roll** to bet your :shell:s, to receive 0x, 1x, 2x, or 3x the amount :shell:s back, with equal probability.
-
-Additionally, whenever you roll, you have a chance to gain :zap:. The more of your saved :shell:s you roll on, the higher the chance that you'll gain :zap:.
-
-**Free** will give you a small number of :shell:s for free! No charge at all.
-
-**Brag** will consume :zap: to **brag** about your score. Let your friends know how many :shell:s you've got! When you brag, you'll also be provided with proof of your achievement in **Sselvish**, a cryptographically secure dialect of Common Elvish. 
-
-**Recall** allows you to reset your current gambling run to a past gambling run that you **bragged** about. So make sure to **brag** often!".to_string()
-}
-
-fn build_stats(n: u64) -> String {
-    "# Your Stats\n".to_string()
-        + BANK_PREFIX
-        + &n.to_string()
-        + BANK_SUFFIX
-        + "\n"
-        + INSP_PREFIX
-        + "infinite"
-        + INSP_SUFFIX
-}
-
-fn build_roll_result(state: &InteractionState) -> String {
-    let bet = state.game_state.bet();
-    let bank = state.game_state.bank();
-
-    if bet > bank {
-        "You can't roll on more :shell:s than you have!\n".to_string() + &build_stats(bank)
-    } else {
-        let mut rng = thread_rng();
-        let roll: u64 = rng.gen_range(0, 4);
-        let winnings = roll * bet;
-        let new_bank = bank - bet + winnings;
-        format!(
-            "# :woman_elf::slot_machine:
-You rolled on {} :shell:s...
-for a **{}x** multiplier.
-You **won** {} :shell:s!\n",
-            bet, roll, winnings
-        ) + &build_stats(new_bank)
-    }
-}
-
-fn build_free_result(state: &InteractionState) -> String {
-    format!(
-        "# :woman_elf::magic_wand:
-You are given {} free :shell:s.
-*Come again anytime!*\n",
-        FREE_AMT
-    ) + &build_stats(state.game_state.bank() + FREE_AMT)
-}
-
-fn translate_proof(hash: &[u8]) -> String {
-    let mut proof = "".to_string();
-
-    for i in 1..=PROOF_LENGTH {
-        let n = hash[i];
-
-        let prefix = n & 7;
-        let space = n >> 3 & 1;
-
-        proof += &match prefix {
-            0 => "ba",
-            1 => "la",
-            2 => "ha",
-            3 => "no",
-            4 => "re",
-            5 => "na",
-            6 => "ne",
-            _ => "sha",
-        }
-        .to_string();
-
-        proof += &match space {
-            0 => " ",
-            _ => "",
-        }
-        .to_string();
-    }
-
-    proof.trim().to_string()
-}
-
-fn honorific(amt: u64) -> String {
-    match amt {
-        0 => "a :monkey: Blatant Bonobo :monkey:",
-        1..=9 => "a :cucumber: Cool Cucumber :cucumber:",
-        10..=49 => "a :cut_of_meat: Sizzlin' Steak :cut_of_meat:",
-        50.. => "an :elf: Elegant Elf :elf:",
-    }
-    .to_string()
-}
-
-fn proof(id: &str, amt: &str) -> String {
-    let s = SALT.unwrap_or("SOME_DEFAULT_VALUE").to_string() + id + amt;
-    let hash = <[u8; 32]>::from_hex(digest(s)).unwrap();
-    translate_proof(&hash)
-}
-
-fn build_brag_result(state: &InteractionState) -> String {
-    let id = &state.user;
-    let bank = state.game_state.bank();
-
-    format!(
-        "## <@{}> has {} :shell:s!\n## <@{}> is {}\n",
-        id,
-        bank,
-        id,
-        honorific(bank)
-    ) + &format!("### Proof: *{}*", proof(id, &bank.to_string()))
-}
-
-fn build_recall_submit_result(
-    state: &InteractionState,
-    fields: collections::HashMap<String, String>,
-) -> String {
-    let user_claim = fields.get("claim").unwrap();
-    let user_proof = fields.get("proof").unwrap().trim();
-    let expected_proof = proof(&state.user, user_claim);
-    let user_claim = user_claim.parse::<u64>();
-
-    if user_proof == expected_proof && user_claim.is_ok() {
-        let new_bank = user_claim.unwrap();
-
-        format!(
-            "# Circle of Recall
-Your claim is legitimate. You recall, and now have {} :shell:s!\n",
-            new_bank
-        ) + &build_stats(new_bank)
-    } else {
-        format!(
-            "# Circle of Recall
-Your claim failed. You cannot recall anything.\n",
-        ) + &build_stats(state.game_state.bank())
-    }
-}
+const FREE_SHELLS_AMT: u64 = 5;
+const FREE_INSP_AMT: u64 = 1;
 
 pub struct ShellsHandler;
 
 impl Handler for ShellsHandler {
-    fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
-        InteractionResponse::message()
-            .content(&(build_rules_message() + "\n" + &build_stats(0)))
-            .components(build_action_row())
-            .into()
+    fn handle_application_command(&self, req: &InteractionRequest) -> InteractionResponse {
+        let state: InteractionState = req.into();
+        new_message(&messages::welcome_message(&state))
     }
 
     fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
         let state: InteractionState = req.into();
-
         let id = req.custom_id().unwrap();
 
         let res: InteractionResponse = match id.as_str() {
-            "roll" => InteractionResponse::message()
-                .content(&build_roll_result(&state))
-                .components(build_action_row())
-                .into(),
-
-            "free" => InteractionResponse::message()
-                .content(&build_free_result(&state))
-                .components(build_action_row())
-                .into(),
-
-            "brag" => InteractionResponse::message()
-                .content(&build_brag_result(&state))
-                .shout()
-                .into(),
-
-            "recall" => InteractionResponse::modal()
-                .id("submit_recall")
-                .title("Circle of Recall")
-                .components(build_recall_fields())
-                .into(),
-
-            "rules" => InteractionResponse::message()
-                .content(&(build_rules_message() + "\n" + &state.game_state.fmt()))
-                .components(build_action_row())
-                .into(),
-
-            &_ => todo!(),
+            "roll" => edit_message(&roll_result(state)),
+            "set_roll" => set_roll_modal("set_roll", "Set Roll Amount"),
+            "free" => edit_message(&free_result(state)),
+            "proof" => edit_message(&proof_result(state)),
+            "recall" => recall_modal("submit_recall", "Circle of Recall"),
+            &_ => panic!("unknown message command"),
         };
 
-        match id.as_str() {
-            "brag" => res,
-            "recall" => res,
-            _ => res.edit(),
-        }
+        res
     }
 
     fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
+        let state: InteractionState = req.into();
+        let values = req.modal_submit_values();
         let id = req.custom_id().unwrap();
 
         match id.as_str() {
-            "submit_recall" => {
-                let state: InteractionState = req.into();
-
-                let content = build_recall_submit_result(&state, req.modal_submit_values());
-
-                let resp: InteractionResponse = InteractionResponse::message()
-                    .content(&content)
-                    .components(build_action_row())
-                    .into();
-
-                resp.edit()
-            }
-
+            "submit_recall" => edit_message(&recall_submit_result(state, values)),
+            "set_roll" => edit_message(&set_roll_submit_result(state, values)),
             &_ => todo!(),
         }
+    }
+}
+
+fn roll_result(mut state: InteractionState) -> String {
+    let bet = state.game_state.bet;
+    let bank = state.game_state.bank;
+
+    if bet > bank {
+        messages::roll_failure_message(&state)
+    } else {
+        let roll: u64 = thread_rng().gen_range(0, 4);
+        let winnings = roll * bet;
+        state.game_state.bank = bank - bet + winnings;
+        state.game_state.bet = cmp::max(state.game_state.bet, state.game_state.bank);
+        messages::roll_success_message(bet, roll, &state)
+    }
+}
+
+fn free_result(mut state: InteractionState) -> String {
+    let roll: u8 = thread_rng().gen_range(0, 4);
+    match roll {
+        // 25% chance
+        0 => {
+            state.game_state.insp += FREE_INSP_AMT;
+            messages::free_message(None, Some(FREE_INSP_AMT), &state)
+        }
+
+        // 75% chance
+        1.. => {
+            state.game_state.bank += FREE_SHELLS_AMT;
+            messages::free_message(Some(FREE_SHELLS_AMT), None, &state)
+        }
+    }
+}
+
+fn proof_result(mut state: InteractionState) -> String {
+    if state.game_state.insp > 0 {
+        state.game_state.insp -= 1;
+        let proof = sselvish::proof(&state.user, &state.game_state.bank.to_string());
+        messages::proof_success_message(&proof, &state)
+    } else {
+        messages::proof_failure_message(&state)
+    }
+}
+
+fn recall_submit_result(
+    mut state: InteractionState,
+    fields: collections::HashMap<String, String>,
+) -> String {
+    let user_claim = fields.get("claim").unwrap();
+    let user_proof = fields.get("proof").unwrap().trim();
+    let expected_proof = sselvish::proof(&state.user, user_claim);
+    let user_claim = user_claim.parse::<u64>();
+
+    if user_proof == expected_proof && user_claim.is_ok() {
+        state.game_state.bank = user_claim.unwrap();
+
+        messages::recall_success_message(user_proof, &state)
+    } else {
+        messages::recall_failure_message(user_proof, &state)
+    }
+}
+
+fn set_roll_submit_result(
+    mut state: InteractionState,
+    fields: collections::HashMap<String, String>,
+) -> String {
+    let bet = fields.get("roll_amt").unwrap().parse::<u64>();
+
+    if bet.is_ok() {
+        let bet = bet.unwrap();
+        if bet <= state.game_state.bank {
+            state.game_state.bet = bet;
+            messages::set_roll_success_message(bet, &state)
+        } else {
+            messages::set_roll_amt_failure_message(&state)
+        }
+    } else {
+        messages::set_roll_parse_failure_message(&state)
     }
 }
 
@@ -280,11 +157,11 @@ mod tests {
 
         let resp = ShellsHandler.handle_message_component(&req);
 
-        let content = resp.message_content().unwrap();
+        let content = &resp.message_content().unwrap();
 
         let state: GameState = content.into();
 
-        assert_eq!(state.bank() % 3043, 0);
+        assert_eq!(state.bank % 3043, 0);
     }
 
     #[test]
@@ -302,11 +179,14 @@ mod tests {
 
         let req = req.message(message).member(GuildMember::new("some user"));
 
-        let resp = ShellsHandler.handle_message_component(&req);
+        let resp_content = &ShellsHandler
+            .handle_message_component(&req)
+            .message_content()
+            .unwrap();
 
-        assert_eq!(
-            resp.message_content().unwrap(),
-            "# :woman_elf::magic_wand:\nYou are given 5 free :shell:s.\n*Come again anytime!*\n# Your Stats\nYou have: 3048 :shell:s\nYou have: infinite :zap:".to_string()
-        );
+        let new: GameState = resp_content.into();
+
+        assert!(new.bank == 3048 || new.insp == 1);
+        assert!(new.bank == 3043 || new.insp == 0);
     }
 }
