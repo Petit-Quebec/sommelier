@@ -129,10 +129,23 @@ You can find :squid:s at the **beach**!
 
 fn honorific(bank: u64) -> String {
     match bank {
-        0 => "a :monkey: Blatant Bonobo :monkey:",
-        1..=9 => "a :cucumber: Cool Cucumber :cucumber:",
-        10..=49 => "a :cut_of_meat: Sizzlin' Steak :cut_of_meat:",
-        50.. => "an :elf: Elegant Elf :elf:",
+        // not sure how to do this idiomatically...
+        0.. => "a :monkey: Blatant Bonobo :monkey:",
+        8.. => "a :parrot: Petulant Parrot :parrot:",
+        64.. => "a :seal: Slippery Seal :seal:",
+        512.. => "a :cucumber: Cool Cucumber :cucumber:",
+        4096.. => "a :lobster: Lovely Lobster :lobster:",
+        32768.. => "an :octopus: Obscure Octopus :octopus:",
+        262144.. => "a :crab: Crude Crab :crab:",
+        2097152.. => "a :coconut: Creamy Coconut :coconut:",
+        16777216.. => "a :shrimp: Shiny Shrimp :shrimp:",
+        134217728.. => "a :coral: Eef Reef Feef Reef :coral:",
+        1073741824.. => "a :worm: Wriggling Worm :worm:",
+        8589934592.. => "a :microbe: Mysterious Microbe :microbe:",
+        68719476736.. => "a :bubbles: Brilliant Bubble :bubbles:",
+        549755813888.. => "a :ocean: Whopping Wave :ocean:",
+        4398046511104.. => "a :cloud: Camouflaged Cloud :cloud:",
+        35184372088832.. => "a :cloud_tornado: Turbulent Twister :cloud_tornado:",
     }
     .to_string()
 }
