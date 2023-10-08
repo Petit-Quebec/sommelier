@@ -130,22 +130,22 @@ You can find :squid:s at the **beach**!
 fn honorific(bank: u64) -> String {
     match bank {
         // not sure how to do this idiomatically...
-        0.. => "a :monkey: Blatant Bonobo :monkey:",
-        8.. => "a :parrot: Petulant Parrot :parrot:",
-        64.. => "a :seal: Slippery Seal :seal:",
-        512.. => "a :cucumber: Cool Cucumber :cucumber:",
-        4096.. => "a :lobster: Lovely Lobster :lobster:",
-        32768.. => "an :octopus: Obscure Octopus :octopus:",
-        262144.. => "a :crab: Crude Crab :crab:",
-        2097152.. => "a :coconut: Creamy Coconut :coconut:",
-        16777216.. => "a :shrimp: Shiny Shrimp :shrimp:",
-        134217728.. => "a :coral: Eef Reef Feef Reef :coral:",
-        1073741824.. => "a :worm: Wriggling Worm :worm:",
-        8589934592.. => "a :microbe: Mysterious Microbe :microbe:",
-        68719476736.. => "a :bubbles: Brilliant Bubble :bubbles:",
-        549755813888.. => "a :ocean: Whopping Wave :ocean:",
-        4398046511104.. => "a :cloud: Camouflaged Cloud :cloud:",
         35184372088832.. => "a :cloud_tornado: Turbulent Twister :cloud_tornado:",
+        4398046511104.. => "a :cloud: Camouflaged Cloud :cloud:",
+        549755813888.. => "a :ocean: Whopping Wave :ocean:",
+        68719476736.. => "a :bubbles: Brilliant Bubble :bubbles:",
+        8589934592.. => "a :microbe: Mysterious Microbe :microbe:",
+        1073741824.. => "a :worm: Wriggling Worm :worm:",
+        134217728.. => "a :coral: Eef Reef Feef Reef :coral:",
+        16777216.. => "a :shrimp: Shiny Shrimp :shrimp:",
+        2097152.. => "a :coconut: Creamy Coconut :coconut:",
+        262144.. => "a :crab: Crude Crab :crab:",
+        32768.. => "an :octopus: Obscure Octopus :octopus:",
+        4096.. => "a :lobster: Lovely Lobster :lobster:",
+        512.. => "a :cucumber: Cool Cucumber :cucumber:",
+        64.. => "a :seal: Slippery Seal :seal:",
+        8.. => "a :parrot: Petulant Parrot :parrot:",
+        0.. => "a :monkey: Blatant Bonobo :monkey:",
     }
     .to_string()
 }

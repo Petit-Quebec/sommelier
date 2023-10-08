@@ -64,7 +64,7 @@ fn roll_result(mut state: InteractionState) -> String {
         let roll: u64 = thread_rng().gen_range(0, 4);
         let winnings = roll * bet;
         state.game_state.bank = bank - bet + winnings;
-        state.game_state.bet = cmp::max(state.game_state.bet, state.game_state.bank);
+        state.game_state.bet = cmp::min(state.game_state.bet, state.game_state.bank);
         messages::roll_success_message(bet, roll, &state)
     }
 }
