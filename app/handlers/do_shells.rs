@@ -12,7 +12,7 @@ use crate::{InteractionRequest, InteractionResponse};
 use interaction_wrappers::{edit_message, new_message, recall_modal, set_roll_modal};
 use rand::{thread_rng, Rng};
 use state::InteractionState;
-use std::collections;
+use std::{cmp, collections};
 
 const FREE_SHELLS_AMT: u64 = 5;
 const FREE_INSP_AMT: u64 = 1;
@@ -64,6 +64,7 @@ fn roll_result(mut state: InteractionState) -> String {
         let roll: u64 = thread_rng().gen_range(0, 4);
         let winnings = roll * bet;
         state.game_state.bank = bank - bet + winnings;
+        state.game_state.bet = cmp::max(state.game_state.bet, state.game_state.bank);
         messages::roll_success_message(bet, roll, &state)
     }
 }
