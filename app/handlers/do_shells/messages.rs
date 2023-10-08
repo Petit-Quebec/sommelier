@@ -105,6 +105,8 @@ Let it be noted to the public that:
 > <@{}> has {} :shell:s!
 > <@{}> is a {}!
 ### Proof: *{}*
+
+*Make sure to record your :shell: amount and its **proof**. The Scribe is not a recordkeeper!*
 "#,
         user,
         bank,
