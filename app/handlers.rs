@@ -8,16 +8,16 @@ pub use do_error::ErrorHandler;
 pub use do_game_of_life::{GameOfLifeHandler, SIZE};
 pub use do_shells::ShellsHandler;
 
-use crate::{InteractionRequest, InteractionResponse};
+use discord_interaction::{Request, Response};
 
 pub trait Handler {
-    fn handle_application_command(&self, data: &InteractionRequest) -> InteractionResponse;
+    fn handle_application_command(&self, data: &Request) -> Response;
 
-    fn handle_message_component(&self, data: &InteractionRequest) -> InteractionResponse {
+    fn handle_message_component(&self, data: &Request) -> Response {
         Self::handle_application_command(self, data)
     }
 
-    fn handle_modal_submit(&self, data: &InteractionRequest) -> InteractionResponse {
+    fn handle_modal_submit(&self, data: &Request) -> Response {
         Self::handle_application_command(self, data)
     }
 }

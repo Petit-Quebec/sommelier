@@ -4,13 +4,11 @@
  */
 
 mod handlers;
-pub mod interactions;
 
-use crate::interactions::InteractionType::*;
-use crate::interactions::*;
+use discord_interaction::{InteractionType::*, *};
 use handlers::{DeedeeHandler, ErrorHandler, GameOfLifeHandler, Handler, ShellsHandler};
 
-pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
+pub fn handle_interaction(request: &Request) -> Response {
     match request.r#type {
         Ping => handle_ping(request),
 
@@ -22,8 +20,8 @@ pub fn handle_interaction(request: &InteractionRequest) -> InteractionResponse {
     }
 }
 
-fn handle_ping(_: &InteractionRequest) -> InteractionResponse {
-    InteractionResponse::pong()
+fn handle_ping(_: &Request) -> Response {
+    Response::pong()
 }
 
 fn select_handler(name: &str) -> Box<dyn Handler> {
@@ -38,14 +36,14 @@ fn select_handler(name: &str) -> Box<dyn Handler> {
     }
 }
 
-fn handle_application_command(request: &InteractionRequest) -> InteractionResponse {
+fn handle_application_command(request: &Request) -> Response {
     match request.command_name() {
         Some(name) => select_handler(&name).handle_application_command(request),
         None => make_error_response(),
     }
 }
 
-fn handle_message_component(request: &InteractionRequest) -> InteractionResponse {
+fn handle_message_component(request: &Request) -> Response {
     let name = &request
         .message
         .as_ref()
@@ -58,7 +56,7 @@ fn handle_message_component(request: &InteractionRequest) -> InteractionResponse
     select_handler(name).handle_message_component(request)
 }
 
-fn handle_modal_submit(request: &InteractionRequest) -> InteractionResponse {
+fn handle_modal_submit(request: &Request) -> Response {
     let name = &request
         .message
         .as_ref()
@@ -71,8 +69,8 @@ fn handle_modal_submit(request: &InteractionRequest) -> InteractionResponse {
     select_handler(name).handle_modal_submit(request)
 }
 
-fn make_error_response() -> InteractionResponse {
-    InteractionResponse::message()
+fn make_error_response() -> Response {
+    Response::message()
         .content("Something erroneous happened...")
         .into()
 }
@@ -85,16 +83,16 @@ mod tests {
 
     #[test]
     fn test_ping_pong() {
-        let req = InteractionRequest::ping();
+        let req = Request::ping();
 
         let resp = handle_interaction(&req);
 
-        assert_eq!(resp, InteractionResponse::pong());
+        assert_eq!(resp, Response::pong());
     }
 
     #[test]
     fn test_conway() {
-        let req: InteractionRequest = InteractionRequest::application_command("conway").into();
+        let req: Request = Request::application_command("conway").into();
 
         let resp = handle_interaction(&req);
 
@@ -110,20 +108,18 @@ mod tests {
 
     #[test]
     fn test_deedee() {
-        let req = InteractionRequest::application_command("deedee").into();
+        let req = Request::application_command("deedee").into();
 
         let resp = handle_interaction(&req);
 
-        let expected_resp = InteractionResponse::message()
-            .content("mega doo doo")
-            .into();
+        let expected_resp = Response::message().content("mega doo doo").into();
 
         assert_eq!(resp, expected_resp);
     }
 
     #[test]
     fn shell_game() {
-        let req = InteractionRequest::application_command("shells").into();
+        let req = Request::application_command("shells").into();
 
         let resp = handle_interaction(&req);
 

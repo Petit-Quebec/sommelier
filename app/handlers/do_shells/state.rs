@@ -1,4 +1,4 @@
-use crate::InteractionRequest;
+use discord_interaction::Request;
 use regex::Regex;
 use std::fmt;
 
@@ -14,8 +14,8 @@ pub struct InteractionState {
     pub game_state: GameState,
 }
 
-impl From<&InteractionRequest> for InteractionState {
-    fn from(req: &InteractionRequest) -> Self {
+impl From<&Request> for InteractionState {
+    fn from(req: &Request) -> Self {
         InteractionState {
             user: req.get_user(),
             game_state: (&req.message_content()).into(),

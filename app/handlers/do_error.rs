@@ -3,14 +3,12 @@
  */
 
 use crate::handlers::Handler;
-use crate::{InteractionRequest, InteractionResponse};
+use discord_interaction::{Request, Response};
 
 pub struct ErrorHandler;
 
 impl Handler for ErrorHandler {
-    fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
-        InteractionResponse::message()
-            .content("Unknown command...")
-            .into()
+    fn handle_application_command(&self, _: &Request) -> Response {
+        Response::message().content("Unknown command...").into()
     }
 }

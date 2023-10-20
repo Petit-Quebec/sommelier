@@ -1,27 +1,27 @@
-use crate::{Component, InteractionResponse};
+use discord_interaction::{Component, Response};
 
-pub fn new_message(msg: &str) -> InteractionResponse {
-    InteractionResponse::message()
+pub fn new_message(msg: &str) -> Response {
+    Response::message()
         .content(msg)
         .components(build_action_row())
         .shout()
         .into()
 }
 
-pub fn edit_message(msg: &str) -> InteractionResponse {
+pub fn edit_message(msg: &str) -> Response {
     new_message(msg).edit()
 }
 
-pub fn recall_modal(id: &str, title: &str) -> InteractionResponse {
-    InteractionResponse::modal()
+pub fn recall_modal(id: &str, title: &str) -> Response {
+    Response::modal()
         .id(id)
         .title(title)
         .components(build_recall_fields())
         .into()
 }
 
-pub fn set_roll_modal(id: &str, title: &str) -> InteractionResponse {
-    InteractionResponse::modal()
+pub fn set_roll_modal(id: &str, title: &str) -> Response {
+    Response::modal()
         .id(id)
         .title(title)
         .components(build_set_roll_fields())
