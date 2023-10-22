@@ -5,18 +5,33 @@
 
 mod handlers;
 
-use discord_interaction::{InteractionType::*, *};
+use discord_interaction::{run_handler, InteractionHandler, InteractionType::*, Request, Response};
 use handlers::{DeedeeHandler, ErrorHandler, GameOfLifeHandler, Handler, ShellsHandler};
+use lambda_http::Error;
 
-pub fn handle_interaction(request: &Request) -> Response {
-    match request.r#type {
-        Ping => handle_ping(request),
+const APPLICATION_PUBLIC_KEY: &str = env!("SOMMELIER_PUBLIC_KEY");
 
-        ApplicationCommand => handle_application_command(request),
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let handler = Sommelier {};
+    run_handler(APPLICATION_PUBLIC_KEY, &handler).await
+}
 
-        MessageComponent => handle_message_component(request),
+// For now, this is our generic handler struct. Not 100% decided on whether handler behavior should
+// be driven by a trait impl or not.
+struct Sommelier;
 
-        ModalSubmit => handle_modal_submit(request),
+impl InteractionHandler for Sommelier {
+    fn handle_interaction(&self, request: &Request) -> Response {
+        match request.r#type {
+            Ping => handle_ping(request),
+
+            ApplicationCommand => handle_application_command(request),
+
+            MessageComponent => handle_message_component(request),
+
+            ModalSubmit => handle_modal_submit(request),
+        }
     }
 }
 
@@ -81,11 +96,13 @@ mod tests {
     use super::*;
     use handlers::SIZE;
 
+    const INTERACTION_HANDLER: Sommelier = Sommelier {};
+
     #[test]
     fn test_ping_pong() {
         let req = Request::ping();
 
-        let resp = handle_interaction(&req);
+        let resp = INTERACTION_HANDLER.handle_interaction(&req);
 
         assert_eq!(resp, Response::pong());
     }
@@ -94,7 +111,7 @@ mod tests {
     fn test_conway() {
         let req: Request = Request::application_command("conway").into();
 
-        let resp = handle_interaction(&req);
+        let resp = INTERACTION_HANDLER.handle_interaction(&req);
 
         let content = resp.message_content().unwrap();
 
@@ -110,7 +127,7 @@ mod tests {
     fn test_deedee() {
         let req = Request::application_command("deedee").into();
 
-        let resp = handle_interaction(&req);
+        let resp = INTERACTION_HANDLER.handle_interaction(&req);
 
         let expected_resp = Response::message().content("mega doo doo").into();
 
@@ -121,7 +138,7 @@ mod tests {
     fn shell_game() {
         let req = Request::application_command("shells").into();
 
-        let resp = handle_interaction(&req);
+        let resp = INTERACTION_HANDLER.handle_interaction(&req);
 
         let components = resp.message_components();
 

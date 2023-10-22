@@ -25,9 +25,6 @@ The way you do this will depend on your terminal. A way of doing this in VS Code
 
 # If you want to write code...
 
-## Just modify the code in the `app/` folder
-Most of the rest of the files in this repository have to do with file organization, project building, or project deployment. So if you just want to add functionality to the bot itself, you can focus your efforts to that folder. Once you've added some functionality to the bot, open a pull request (PR), and it will be deployed for you. 
-
 ## Pull Request Requirements
 Even though this project is just for fun, we do need to enforce some level of regularity. The following three criteria are three very general acceptance criteria for pull requests (PRs).
 
@@ -77,5 +74,3 @@ The first three of these can be found in the Discord Developer Portal. `SOMMELIE
 
 ## Deploying
 To deploy the project, run the `deploy.sh` scripts, which builds the project, and then deploys it to a lambda named `sommelier`. 
-
-To run just the **ante** module, which initializes the discord bot, run `cargo run -p ante`. Make sure to deploy your bot before running this script, or else the Discord backend may reject your command initialization.

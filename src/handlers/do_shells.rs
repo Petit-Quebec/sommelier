@@ -138,7 +138,7 @@ mod tests {
 
     use super::*;
     use crate::handlers::do_shells::state::GameState;
-    use crate::{GuildMember, Message, MessageInteraction};
+    use discord_interaction::{GuildMember, Message, MessageInteraction};
 
     #[test]
     fn roll() {
