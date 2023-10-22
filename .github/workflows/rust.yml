@@ -25,11 +25,5 @@ jobs:
       run: cargo fmt --check
     - name: Build App
       run: cargo build --verbose
-    - name: Build Lambda
-      run: cargo build -p lambda --verbose
-    - name: Build Ante
-      run: cargo build -p ante --verbose
     - name: Test App
       run: cargo test --verbose
-    - name: Test Lambda
-      run: cargo test -p lambda --verbose
