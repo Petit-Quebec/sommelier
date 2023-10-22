@@ -10,7 +10,6 @@ use lambda_http::{run, service_fn, Body, Error, Request, Response};
 use serde_json::json;
 
 use app::handle_interaction;
-pub use app::interactions::InteractionRequest;
 
 const APPLICATION_PUBLIC_KEY: &str = env!("SOMMELIER_PUBLIC_KEY");
 
@@ -84,7 +83,7 @@ fn function_handler_helper(event: &Request) -> Result<String, StatusCode> {
 fn handle_interaction_json(request_json: &str) -> Result<String, StatusCode> {
     tracing::info!({ %request_json }, "Handling request json");
 
-    match serde_json::from_str::<InteractionRequest>(request_json) {
+    match serde_json::from_str::<discord_interaction::Request>(request_json) {
         Ok(interaction) => {
             let interaction_response = handle_interaction(&interaction);
 

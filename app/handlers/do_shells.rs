@@ -8,7 +8,7 @@ mod sselvish;
 mod state;
 
 use crate::handlers::Handler;
-use crate::{InteractionRequest, InteractionResponse};
+use discord_interaction::{Request, Response};
 use interaction_wrappers::{edit_message, new_message, recall_modal, set_roll_modal};
 use rand::{thread_rng, Rng};
 use state::InteractionState;
@@ -20,16 +20,16 @@ const FREE_INSP_AMT: u64 = 1;
 pub struct ShellsHandler;
 
 impl Handler for ShellsHandler {
-    fn handle_application_command(&self, req: &InteractionRequest) -> InteractionResponse {
+    fn handle_application_command(&self, req: &Request) -> Response {
         let state: InteractionState = req.into();
         new_message(&messages::welcome_message(&state))
     }
 
-    fn handle_message_component(&self, req: &InteractionRequest) -> InteractionResponse {
+    fn handle_message_component(&self, req: &Request) -> Response {
         let state: InteractionState = req.into();
         let id = req.custom_id().unwrap();
 
-        let res: InteractionResponse = match id.as_str() {
+        let res: Response = match id.as_str() {
             "roll" => edit_message(&roll_result(state)),
             "set_roll" => set_roll_modal("set_roll", "Set Roll Amount"),
             "free" => edit_message(&free_result(state)),
@@ -41,7 +41,7 @@ impl Handler for ShellsHandler {
         res
     }
 
-    fn handle_modal_submit(&self, req: &InteractionRequest) -> InteractionResponse {
+    fn handle_modal_submit(&self, req: &Request) -> Response {
         let state: InteractionState = req.into();
         let values = req.modal_submit_values();
         let id = req.custom_id().unwrap();
@@ -151,7 +151,7 @@ mod tests {
             interaction: Some(interaction),
         };
 
-        let req: InteractionRequest = InteractionRequest::message_component("roll", 0).into();
+        let req: Request = Request::message_component("roll", 0).into();
 
         let req = req.message(message).member(GuildMember::new("some user"));
 
@@ -175,7 +175,7 @@ mod tests {
             interaction: Some(interaction),
         };
 
-        let req: InteractionRequest = InteractionRequest::message_component("free", 0).into();
+        let req: Request = Request::message_component("free", 0).into();
 
         let req = req.message(message).member(GuildMember::new("some user"));
 

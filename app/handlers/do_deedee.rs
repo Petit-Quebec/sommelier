@@ -3,14 +3,12 @@
  */
 
 use crate::handlers::Handler;
-use crate::{InteractionRequest, InteractionResponse};
+use discord_interaction::{Request, Response};
 
 pub struct DeedeeHandler;
 
 impl Handler for DeedeeHandler {
-    fn handle_application_command(&self, _: &InteractionRequest) -> InteractionResponse {
-        InteractionResponse::message()
-            .content("mega doo doo")
-            .into()
+    fn handle_application_command(&self, _: &Request) -> Response {
+        Response::message().content("mega doo doo").into()
     }
 }
