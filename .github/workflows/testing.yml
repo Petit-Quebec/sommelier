@@ -1,0 +1,21 @@
+name: testing
+
+on:
+  push:
+    branches: [ "**" ]
+
+jobs:
+  build_and_test:
+
+    runs-on: ubuntu-latest
+
+    env:
+      CARGO_TERM_COLOR: always
+      SOMMELIER_GAMBLING_SALT: ${{ secrets.SOMMELIER_GAMBLING_SALT }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check Formatting
+      run: cargo fmt --check
+    - name: Test App
+      run: cargo test --release --verbose

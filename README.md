@@ -55,22 +55,6 @@ If something goes wrong, then it will change to:
 
 These checks verify that things are going "the way they should". If you've satisfied all of these criteria (testing coverage, minimality, CI passing) then your PR will be merged in. Example "hello world" PR here: https://github.com/Petit-Quebec/sommelier/pull/1
 
-# If you want to deploy your own Sommelier...
+# Deployment
 
-## Environment Setup
-
-To deploy this app, you will need [Cargo Lambda](https://www.cargo-lambda.info/) >= 0.20.1. You will also need your [AWS CLI to be properly configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html). 
-
-You will also need an application with a bot user in the [Discord Developer Portal](https://discord.com/developers/applications). 
-
-You will also need the following environment variables: 
-- `SOMMELIER_PUBLIC_KEY`
-- `SOMMELIER_APPLICATION_ID`
-- `SOMMELIER_BOT_TOKEN`
-- `SOMMELIER_LAMBDA_EXECUTION_ROLE`
-- `SOMMELIER_GAMBLING_SALT`
-
-The first three of these can be found in the Discord Developer Portal. `SOMMELIER_LAMBDA_EXECUTION_ROLE` should be created on your AWS account, with the **AWSLambdaBasicExecutionRole** policy. `SOMMELIER_GAMBLING_SALT` is the variable required for the app itself.
-
-## Deploying
-To deploy the project, run the `deploy.sh` scripts, which builds the project, and then deploys it to a lambda named `sommelier`. 
+Sommelier is automatically deployed on push to main. Once your pull request is merged in, the changes to the bot will be propagated within a few minutes. For specification on deployment, see `.github/workflows/deployment.yml`.

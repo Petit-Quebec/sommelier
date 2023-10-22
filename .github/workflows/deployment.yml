@@ -1,0 +1,57 @@
+name: deployment
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+  
+    environment: deployment
+    
+    env:
+      CARGO_TERM_COLOR: always
+      SOMMELIER_APPLICATION_ID: ${{ secrets.SOMMELIER_APPLICATION_ID }}
+      SOMMELIER_BOT_TOKEN: ${{ secrets.SOMMELIER_BOT_TOKEN }}
+      SOMMELIER_LAMBDA_EXECUTION_ROLE: ${{ secrets.SOMMELIER_LAMBDA_EXECUTION_ROLE }}
+      SOMMELIER_PUBLIC_KEY: ${{ secrets.SOMMELIER_PUBLIC_KEY }}
+      SOMMELIER_GAMBLING_SALT: ${{ secrets.SOMMELIER_GAMBLING_SALT }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check Formatting
+      run: cargo fmt --check
+    - name: Test App
+      run: cargo test --release --verbose
+
+    # Set up cargo lambda, following https://www.cargo-lambda.info/guide/getting-started.html
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Install Zig toolchain
+      uses: korandoru/setup-zig@v1
+      with:
+        zig-version: 0.10.0
+    - name: Install Cargo Lambda
+      uses: jaxxstorm/action-install-gh-release@v1.9.0
+      with:
+        repo: cargo-lambda/cargo-lambda
+        platform: linux 
+        arch: x86_64
+
+    # Log in to AWS
+    - name: Set AWS Access Key
+      run: aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+    - name: Set AWS Secret
+      run: aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+    - name: Set AWS Region
+      run: aws configure set region ${AWS_REGION}
+
+    # Deploy to lambda
+    - name: Build App
+      run: cargo lambda build --release --verbose
+    - name: Deploy App
+      run: cargo lambda deploy --iam-role ${SOMMELIER_LAMBDA_EXECUTION_ROLE} sommelier 

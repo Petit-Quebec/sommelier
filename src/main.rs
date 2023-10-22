@@ -9,12 +9,12 @@ use discord_interaction::{run_handler, InteractionHandler, InteractionType::*, R
 use handlers::{DeedeeHandler, ErrorHandler, GameOfLifeHandler, Handler, ShellsHandler};
 use lambda_http::Error;
 
-const APPLICATION_PUBLIC_KEY: &str = env!("SOMMELIER_PUBLIC_KEY");
+const APPLICATION_PUBLIC_KEY: Option<&'static str> = option_env!("SOMMELIER_PUBLIC_KEY");
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let handler = Sommelier {};
-    run_handler(APPLICATION_PUBLIC_KEY, &handler).await
+    run_handler(APPLICATION_PUBLIC_KEY.unwrap_or(""), &handler).await
 }
 
 // For now, this is our generic handler struct. Not 100% decided on whether handler behavior should
