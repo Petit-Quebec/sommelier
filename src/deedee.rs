@@ -2,7 +2,7 @@
  * Implementation of "deedee" command.
  */
 
-use crate::handlers::Handler;
+use crate::Handler;
 use discord_interaction::{Request, Response};
 
 pub struct DeedeeHandler;

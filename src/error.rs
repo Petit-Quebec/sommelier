@@ -2,7 +2,7 @@
  * Implementation for returning an error.
  */
 
-use crate::handlers::Handler;
+use crate::Handler;
 use discord_interaction::{Request, Response};
 
 pub struct ErrorHandler;
