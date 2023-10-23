@@ -1,4 +1,4 @@
-use crate::handlers::Handler;
+use crate::Handler;
 use discord_interaction::{Request, Response};
 use rand;
 

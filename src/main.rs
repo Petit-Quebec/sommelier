@@ -3,11 +3,17 @@
  * response according to application rules.
  */
 
-mod handlers;
+mod deedee;
+mod error;
+mod game_of_life;
+mod shells;
 
+use deedee::DeedeeHandler;
 use discord_interaction::{run_handler, InteractionHandler, InteractionType::*, Request, Response};
-use handlers::{DeedeeHandler, ErrorHandler, GameOfLifeHandler, Handler, ShellsHandler};
+use error::ErrorHandler;
+use game_of_life::GameOfLifeHandler;
 use lambda_http::Error;
+use shells::ShellsHandler;
 
 const APPLICATION_PUBLIC_KEY: Option<&'static str> = option_env!("SOMMELIER_PUBLIC_KEY");
 
@@ -37,6 +43,18 @@ impl InteractionHandler for Sommelier {
 
 fn handle_ping(_: &Request) -> Response {
     Response::pong()
+}
+
+pub trait Handler {
+    fn handle_application_command(&self, data: &Request) -> Response;
+
+    fn handle_message_component(&self, data: &Request) -> Response {
+        Self::handle_application_command(self, data)
+    }
+
+    fn handle_modal_submit(&self, data: &Request) -> Response {
+        Self::handle_application_command(self, data)
+    }
 }
 
 fn select_handler(name: &str) -> Box<dyn Handler> {
@@ -94,7 +112,7 @@ fn make_error_response() -> Response {
 mod tests {
 
     use super::*;
-    use handlers::SIZE;
+    use game_of_life::SIZE;
 
     const INTERACTION_HANDLER: Sommelier = Sommelier {};
 

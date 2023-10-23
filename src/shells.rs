@@ -7,7 +7,7 @@ mod messages;
 mod sselvish;
 mod state;
 
-use crate::handlers::Handler;
+use crate::Handler;
 use discord_interaction::{Request, Response};
 use interaction_wrappers::{edit_message, new_message, recall_modal, set_roll_modal};
 use rand::{thread_rng, Rng};
@@ -136,8 +136,8 @@ fn set_roll_submit_result(
 #[cfg(test)]
 mod tests {
 
+    use super::state::GameState;
     use super::*;
-    use crate::handlers::do_shells::state::GameState;
     use discord_interaction::{GuildMember, Message, MessageInteraction};
 
     #[test]
