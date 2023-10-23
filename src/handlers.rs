@@ -1,12 +1,12 @@
-mod do_deedee;
-mod do_error;
-mod do_game_of_life;
-mod do_shells;
+mod deedee;
+mod error;
+mod game_of_life;
+mod shells;
 
-pub use do_deedee::DeedeeHandler;
-pub use do_error::ErrorHandler;
-pub use do_game_of_life::{GameOfLifeHandler, SIZE};
-pub use do_shells::ShellsHandler;
+pub use deedee::DeedeeHandler;
+pub use error::ErrorHandler;
+pub use game_of_life::{GameOfLifeHandler, SIZE};
+pub use shells::ShellsHandler;
 
 use discord_interaction::{Request, Response};
 

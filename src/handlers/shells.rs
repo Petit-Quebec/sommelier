@@ -137,7 +137,7 @@ fn set_roll_submit_result(
 mod tests {
 
     use super::*;
-    use crate::handlers::do_shells::state::GameState;
+    use crate::handlers::shells::state::GameState;
     use discord_interaction::{GuildMember, Message, MessageInteraction};
 
     #[test]
