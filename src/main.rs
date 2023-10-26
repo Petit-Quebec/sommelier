@@ -9,7 +9,10 @@ mod game_of_life;
 mod shells;
 
 use deedee::DeedeeHandler;
-use discord_interaction::{run_handler, InteractionHandler, InteractionType::*, Request, Response};
+use discord_interaction::{
+    run, ApplicationCommand, InteractionHandler, Message, MessageComponent, Modal, ModalSubmit,
+    Response,
+};
 use error::ErrorHandler;
 use game_of_life::GameOfLifeHandler;
 use lambda_http::Error;
@@ -19,93 +22,38 @@ const APPLICATION_PUBLIC_KEY: Option<&'static str> = option_env!("SOMMELIER_PUBL
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let handler = Sommelier {};
-    run_handler(APPLICATION_PUBLIC_KEY.unwrap_or(""), &handler).await
+    run::<Sommelier>(APPLICATION_PUBLIC_KEY.unwrap_or("")).await
 }
 
-// For now, this is our generic handler struct. Not 100% decided on whether handler behavior should
-// be driven by a trait impl or not.
 struct Sommelier;
 
 impl InteractionHandler for Sommelier {
-    fn handle_interaction(&self, request: &Request) -> Response {
-        match request.r#type {
-            Ping => handle_ping(request),
-
-            ApplicationCommand => handle_application_command(request),
-
-            MessageComponent => handle_message_component(request),
-
-            ModalSubmit => handle_modal_submit(request),
+    fn handle_application_command(ac: ApplicationCommand) -> Response {
+        match ac.command_name.as_str() {
+            "conway" => GameOfLifeHandler::handle_application_command(ac),
+            "deedee" => DeedeeHandler::handle_application_command(ac),
+            "shells" => ShellsHandler::handle_application_command(ac),
+            _ => panic!(),
         }
     }
-}
 
-fn handle_ping(_: &Request) -> Response {
-    Response::pong()
-}
-
-pub trait Handler {
-    fn handle_application_command(&self, data: &Request) -> Response;
-
-    fn handle_message_component(&self, data: &Request) -> Response {
-        Self::handle_application_command(self, data)
+    fn handle_message_component(mc: MessageComponent) -> Response {
+        match mc.id.as_str() {
+            "conway" => GameOfLifeHandler::handle_message_component(mc),
+            "deedee" => DeedeeHandler::handle_message_component(mc),
+            "shells" => ShellsHandler::handle_message_component(mc),
+            _ => panic!(),
+        }
     }
 
-    fn handle_modal_submit(&self, data: &Request) -> Response {
-        Self::handle_application_command(self, data)
+    fn handle_modal_submit(ms: ModalResponse) -> Response {
+        match ms.id.as_str() {
+            "conway" => GameOfLifeHandler::handle_modal_submit(ac),
+            "deedee" => DeedeeHandler::handle_modal_submit(ac),
+            "shells" => ShellsHandler::handle_modal_submit(ac),
+            _ => panic!(),
+        }
     }
-}
-
-fn select_handler(name: &str) -> Box<dyn Handler> {
-    match name {
-        "conway" => Box::new(GameOfLifeHandler),
-
-        "deedee" => Box::new(DeedeeHandler),
-
-        "shells" => Box::new(ShellsHandler),
-
-        _ => Box::new(ErrorHandler),
-    }
-}
-
-fn handle_application_command(request: &Request) -> Response {
-    match request.command_name() {
-        Some(name) => select_handler(&name).handle_application_command(request),
-        None => make_error_response(),
-    }
-}
-
-fn handle_message_component(request: &Request) -> Response {
-    let name = &request
-        .message
-        .as_ref()
-        .unwrap()
-        .interaction
-        .as_ref()
-        .unwrap()
-        .name;
-
-    select_handler(name).handle_message_component(request)
-}
-
-fn handle_modal_submit(request: &Request) -> Response {
-    let name = &request
-        .message
-        .as_ref()
-        .unwrap()
-        .interaction
-        .as_ref()
-        .unwrap()
-        .name;
-
-    select_handler(name).handle_modal_submit(request)
-}
-
-fn make_error_response() -> Response {
-    Response::message()
-        .content("Something erroneous happened...")
-        .into()
 }
 
 #[cfg(test)]
@@ -115,15 +63,6 @@ mod tests {
     use game_of_life::SIZE;
 
     const INTERACTION_HANDLER: Sommelier = Sommelier {};
-
-    #[test]
-    fn test_ping_pong() {
-        let req = Request::ping();
-
-        let resp = INTERACTION_HANDLER.handle_interaction(&req);
-
-        assert_eq!(resp, Response::pong());
-    }
 
     #[test]
     fn test_conway() {

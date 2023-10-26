@@ -11,6 +11,6 @@ rand = "0.3.0"
 regex = "1.9.5"
 sha256 = "1.4.0"
 hex = "0.4.3"
-discord_interaction = "0.0.3"
+discord_interaction = "0.0.4"
 lambda_http = "0.8.1"
 tokio = { version = "1", features = ["macros"] }
